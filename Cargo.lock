@@ -2599,6 +2599,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "status"
+version = "0.3.4"
+dependencies = [
+ "async-trait",
+ "common",
+ "plugin",
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
 name = "streamer"
 version = "0.3.4"
 dependencies = [
