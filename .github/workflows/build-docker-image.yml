@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-app:
-    uses: ./.github/workflows/build.yml@dev
+    uses: ./.github/workflows/build.yml
 
   build-and-push:
     runs-on: ubuntu-latest
