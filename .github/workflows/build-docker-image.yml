@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-app:
-    uses: ./.github/workflows/build.yml@${{ github.ref }}
+    uses: ./.github/workflows/build.yml@${{ github.ref_name }}
 
   build-and-push:
     runs-on: ubuntu-latest
