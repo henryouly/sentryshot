@@ -7,6 +7,8 @@ use common::{
 use plugin::{Plugin, PreLoadPlugin, types::{Router, Templates}};
 use std::ffi::c_char;
 use std::sync::Arc;
+use tokio::runtime::Handle;
+
 
 #[unsafe(no_mangle)]
 pub extern "C" fn version() -> *const c_char {
@@ -22,7 +24,8 @@ struct PreLoadStatus;
 
 impl PreLoadPlugin for PreLoadStatus {
     fn add_log_source(&self) -> Option<LogSource> {
-        None
+        #[allow(clippy::unwrap_used)]
+        Some("status".try_into().unwrap())
     }
 
     fn set_new_auth(&self) -> Option<plugin::types::NewAuthFn> {
@@ -31,7 +34,7 @@ impl PreLoadPlugin for PreLoadStatus {
 }
 
 #[unsafe(no_mangle)]
-pub extern "Rust" fn load(_app: &dyn plugin::Application) -> Arc<dyn Plugin> {
+pub extern "Rust" fn load(app: &dyn plugin::Application) -> Arc<dyn Plugin> {
     // Create an engine and pre-compile the status template so any syntax
     // errors are discovered at plugin load time.
     let engine = upon::Engine::new();
@@ -41,12 +44,13 @@ pub extern "Rust" fn load(_app: &dyn plugin::Application) -> Arc<dyn Plugin> {
         .compile(include_str!("templates/status.tpl"))
         .expect("failed to compile status plugin template");
 
-    Arc::new(StatusPlugin { engine, template })
+    Arc::new(StatusPlugin { engine, template, rt_handle: app.rt_handle() })
 }
 
 struct StatusPlugin {
     engine: upon::Engine<'static>,
     template: upon::Template<'static>,
+    rt_handle: Handle,
 }
 
 struct Status {
