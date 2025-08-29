@@ -32,10 +32,22 @@ impl PreLoadPlugin for PreLoadStatus {
 
 #[unsafe(no_mangle)]
 pub extern "Rust" fn load(_app: &dyn plugin::Application) -> Arc<dyn Plugin> {
-    Arc::new(StatusPlugin {})
+    // Create an engine and pre-compile the status template so any syntax
+    // errors are discovered at plugin load time.
+    let engine = upon::Engine::new();
+    // Compile the status template; panic on error since we cannot return
+    // a Result from the `load` symbol.
+    let template = engine
+        .compile(include_str!("templates/status.tpl"))
+        .expect("failed to compile status plugin template");
+
+    Arc::new(StatusPlugin { engine, template })
 }
 
-struct StatusPlugin;
+struct StatusPlugin {
+    engine: upon::Engine<'static>,
+    template: upon::Template<'static>,
+}
 
 struct Status {
   cpu_usage: u8,
@@ -50,7 +62,6 @@ impl Plugin for StatusPlugin {
         // Append "Hello world" to sidebar (similar pattern to auth_basic)
         if let Some(sidebar) = templates.get_mut("sidebar") {
             let target = "<!-- NAVBAR_BOTTOM -->";
-            let addition = include_str!("templates/status.tpl");
 
             // Mock status data.
             let status = Status {
@@ -60,18 +71,21 @@ impl Plugin for StatusPlugin {
               disk_usage_formatted: "120G / 160G".to_string(),
             };
 
-            // Replace template tokens with mock values so the upon template
-            // engine sees concrete values when rendering.
-            let mut filled = addition.to_string();
-            filled = filled.replace("{{ .status.CPUUsage }}", &format!("{}", status.cpu_usage));
-            filled = filled.replace("{{ .status.RAMUsage }}", &format!("{}", status.ram_usage));
-            filled = filled.replace("{{ .status.DiskUsage }}", &format!("{}", status.disk_usage));
-            filled = filled.replace(
-              "{{ .status.DiskUsageFormatted }}",
-              &status.disk_usage_formatted,
-            );
+            let rendered = self
+                .template
+                .render(
+                    &self.engine,
+                    upon::value! { status: { 
+                        CPUUsage: status.cpu_usage,
+                        RAMUsage: status.ram_usage,
+                        DiskUsage: status.disk_usage,
+                        DiskUsageFormatted: status.disk_usage_formatted,
+                    } },
+                )
+                .to_string()
+                .expect("failed to render status template");
 
-            *sidebar = sidebar.replace(target, &(filled + target));
+            *sidebar = sidebar.replace(target, &(rendered + target));
         }
     }
 

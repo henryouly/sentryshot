@@ -20,6 +20,7 @@ plugin.path = "../../src/plugin"
 
 async-trait.workspace = true
 serde.workspace = true
+upon.workspace = true
 
 [dev-dependencies]
 pretty_assertions.workspace = true

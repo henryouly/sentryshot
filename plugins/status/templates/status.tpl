@@ -47,22 +47,22 @@
     <div class="statusbar-text-container">
       <span class="statusbar-text">CPU</span>
       <span class="statusbar-text statusbar-number"
-        >{{ .status.CPUUsage }}%</span
+        >{{ status.CPUUsage }}%</span
       >
     </div>
     <div class="statusbar-progressbar">
-      <span style="width: {{ .status.CPUUsage }}%"></span>
+      <span style="width: {{ status.CPUUsage }}%"></span>
     </div>
   </li>
   <li>
     <div class="statusbar-text-container">
       <span class="statusbar-text">RAM</span>
       <span class="statusbar-text statusbar-number"
-        >{{ .status.RAMUsage }}%</span
+        >{{ status.RAMUsage }}%</span
       >
     </div>
     <div class="statusbar-progressbar">
-      <span style="width: {{ .status.RAMUsage }}%"></span>
+      <span style="width: {{ status.RAMUsage }}%"></span>
     </div>
   </li>
   <li>
@@ -71,14 +71,14 @@
       <span
         style="margin: auto; font-size: 0.35rem"
         class="statusbar-text"
-        >{{ .status.DiskUsageFormatted }}</span
+        >{{ status.DiskUsageFormatted }}</span
       >
       <span class="statusbar-text statusbar-number"
-        >{{ .status.DiskUsage }}%</span
+        >{{ status.DiskUsage }}%</span
       >
     </div>
     <div class="statusbar-progressbar">
-      <span style="width: {{ .status.DiskUsage }}%"></span>
+      <span style="width: {{ status.DiskUsage }}%"></span>
     </div>
   </li>
 </ul>
