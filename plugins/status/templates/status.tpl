@@ -46,23 +46,23 @@
   <li>
     <div class="statusbar-text-container">
       <span class="statusbar-text">CPU</span>
-      <span class="statusbar-text statusbar-number"
-        >{{ status.CPUUsage }}%</span
-      >
+        <span id="status-cpu-number" class="statusbar-text statusbar-number"
+          >0%</span
+        >
     </div>
     <div class="statusbar-progressbar">
-      <span style="width: {{ status.CPUUsage }}%"></span>
+        <span id="status-cpu-bar" style="width: 0%"></span>
     </div>
   </li>
   <li>
     <div class="statusbar-text-container">
       <span class="statusbar-text">RAM</span>
-      <span class="statusbar-text statusbar-number"
-        >{{ status.RAMUsage }}%</span
-      >
+        <span id="status-ram-number" class="statusbar-text statusbar-number"
+          >0%</span
+        >
     </div>
     <div class="statusbar-progressbar">
-      <span style="width: {{ status.RAMUsage }}%"></span>
+        <span id="status-ram-bar" style="width: 0%"></span>
     </div>
   </li>
   <li>
@@ -71,14 +71,43 @@
       <span
         style="margin: auto; font-size: 0.35rem"
         class="statusbar-text"
-        >{{ status.DiskUsageFormatted }}</span
+        >120G / 160G</span
       >
-      <span class="statusbar-text statusbar-number"
-        >{{ status.DiskUsage }}%</span
-      >
+        <span id="status-disk-number" class="statusbar-text statusbar-number"
+          >0%</span
+        >
     </div>
     <div class="statusbar-progressbar">
-      <span style="width: {{ status.DiskUsage }}%"></span>
+        <span id="status-disk-bar" style="width: 0%"></span>
     </div>
   </li>
 </ul>
+  <script>
+  // Poll /api/status and update the sidebar status bar values.
+  async function updateStatus() {
+    try {
+      const res = await fetch('/api/status');
+      if (!res.ok) return;
+      const s = await res.json();
+      const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const setWidth = (id, v) => { const el = document.getElementById(id); if (el) el.style && (el.style.width = v + '%'); };
+
+      setText('status-cpu-number', s.cpu_usage + '%');
+      setWidth('status-cpu-bar', s.cpu_usage);
+
+      setText('status-ram-number', s.ram_usage + '%');
+      setWidth('status-ram-bar', s.ram_usage);
+
+      setText('status-disk-number', s.disk_usage + '%');
+      setText('status-disk-formatted', s.disk_usage_formatted);
+      setWidth('status-disk-bar', s.disk_usage);
+    } catch (e) {
+      console.debug('status update failed', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateStatus();
+    setInterval(updateStatus, 5000);
+  });
+  </script>

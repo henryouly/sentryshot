@@ -6,13 +6,14 @@ use common::{
     monitor::ArcMonitor,
 };
 use plugin::{Plugin, PreLoadPlugin, types::{Router, Templates}};
+use axum::{Json, extract::State, routing::get};
+use serde_json::json;
 use std::ffi::c_char;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use thiserror::Error;
 use tokio::runtime::Handle;
 use tokio::time::Duration;
 use tokio_util::sync::CancellationToken;
-use upon::{Engine, Template};
 
 
 #[unsafe(no_mangle)]
@@ -44,10 +45,9 @@ pub extern "Rust" fn load(app: &dyn plugin::Application) -> Arc<dyn Plugin> {
 }
 
 struct StatusPlugin {
-    engine: Engine<'static>,
-    template: Template<'static>,
     rt_handle: Handle,
     logger: ArcLogger,
+    status: Arc<Mutex<Status>>,
 }
 
 struct Status {
@@ -63,44 +63,24 @@ enum RunError {
 
 impl StatusPlugin {
     fn new(rt_handle: Handle, logger: ArcLogger) -> Self {
-        let engine = Engine::new();
-        let template = engine
-            .compile(include_str!("templates/status.tpl"))
-            .expect("failed to compile status plugin template");
-        Self { engine, template, rt_handle, logger }
+        let status = Arc::new(Mutex::new(Status {
+            cpu_usage: 42,
+            ram_usage: 37,
+            disk_usage: 67,
+            disk_usage_formatted: "120G / 160G".to_string(),
+        }));
+
+        Self { rt_handle, logger, status }
     }
 }
 
 #[async_trait]
 impl Plugin for StatusPlugin {
     fn edit_templates(&self, templates: &mut Templates) {
-        // Append "Hello world" to sidebar (similar pattern to auth_basic)
         if let Some(sidebar) = templates.get_mut("sidebar") {
             let target = "<!-- NAVBAR_BOTTOM -->";
-
-            // Mock status data.
-            let status = Status {
-              cpu_usage: 42,
-              ram_usage: 33,
-              disk_usage: 73,
-              disk_usage_formatted: "120G / 160G".to_string(),
-            };
-
-            let rendered = self
-                .template
-                .render(
-                    &self.engine,
-                    upon::value! { status: { 
-                        CPUUsage: status.cpu_usage,
-                        RAMUsage: status.ram_usage,
-                        DiskUsage: status.disk_usage,
-                        DiskUsageFormatted: status.disk_usage_formatted,
-                    } },
-                )
-                .to_string()
-                .expect("failed to render status template");
-
-            *sidebar = sidebar.replace(target, &(rendered + target));
+            let addition = include_str!("templates/status.tpl").to_string();
+            *sidebar = sidebar.replace(target, &(addition + target));
         }
     }
 
@@ -109,8 +89,19 @@ impl Plugin for StatusPlugin {
     }
 
     fn route(&self, router: Router) -> Router {
-        router
+        // Expose a lightweight API that returns the current status as JSON.
+        router.route_no_auth("/api/status", get(status_api_handler).with_state(self.status.clone()))
     }
+}
+
+async fn status_api_handler(State(status): State<Arc<Mutex<Status>>>) -> Json<serde_json::Value> {
+    let guard = status.lock().unwrap_or_else(|e| e.into_inner());
+    Json(json!({
+        "cpu_usage": guard.cpu_usage,
+        "ram_usage": guard.ram_usage,
+        "disk_usage": guard.disk_usage,
+        "disk_usage_formatted": guard.disk_usage_formatted,
+    }))
 }
 
 impl StatusPlugin {
@@ -120,6 +111,14 @@ impl StatusPlugin {
     ) -> Result<(), RunError> {
         loop {
             self.logger.log(LogEntry::new2(LogLevel::Debug, "status", "heartbeat"));
+
+            // Update the shared status (simple simulation for now)
+            if let Ok(mut s) = self.status.lock() {
+                s.cpu_usage = s.cpu_usage.wrapping_add(1) % 100;
+                s.ram_usage = s.ram_usage.wrapping_add(1) % 100;
+                s.disk_usage = s.disk_usage.wrapping_add(1) % 100;
+                s.disk_usage_formatted = format!("{}G / 160G", 120 + s.disk_usage as i32);
+            }
 
             let sleep = || {
                 let _enter = self.rt_handle.enter();
