@@ -38,7 +38,6 @@ prost.workspace = true
 prost-types.workspace = true
 tonic-prost.workspace = true
 
-
 [build-dependencies]
 tonic-prost-build.workspace = true
 glob.workspace = true
