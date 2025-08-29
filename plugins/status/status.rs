@@ -8,6 +8,7 @@ use plugin::{Plugin, PreLoadPlugin, types::{Router, Templates}};
 use std::ffi::c_char;
 use std::sync::Arc;
 use tokio::runtime::Handle;
+use upon::{Engine, Template};
 
 
 #[unsafe(no_mangle)]
@@ -35,21 +36,12 @@ impl PreLoadPlugin for PreLoadStatus {
 
 #[unsafe(no_mangle)]
 pub extern "Rust" fn load(app: &dyn plugin::Application) -> Arc<dyn Plugin> {
-    // Create an engine and pre-compile the status template so any syntax
-    // errors are discovered at plugin load time.
-    let engine = upon::Engine::new();
-    // Compile the status template; panic on error since we cannot return
-    // a Result from the `load` symbol.
-    let template = engine
-        .compile(include_str!("templates/status.tpl"))
-        .expect("failed to compile status plugin template");
-
-    Arc::new(StatusPlugin { engine, template, rt_handle: app.rt_handle() })
+    Arc::new(StatusPlugin::new(app.rt_handle()))
 }
 
 struct StatusPlugin {
-    engine: upon::Engine<'static>,
-    template: upon::Template<'static>,
+    engine: Engine<'static>,
+    template: Template<'static>,
     rt_handle: Handle,
 }
 
@@ -58,6 +50,16 @@ struct Status {
   ram_usage: u8,
   disk_usage: u8,
   disk_usage_formatted: String,
+}
+
+impl StatusPlugin {
+    fn new(rt_handle: Handle) -> Self {
+        let engine = Engine::new();
+        let template = engine
+            .compile(include_str!("templates/status.tpl"))
+            .expect("failed to compile status plugin template");
+        Self { engine, template, rt_handle }
+    }
 }
 
 #[async_trait]
