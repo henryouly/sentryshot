@@ -10,6 +10,7 @@ use axum::{Json, extract::State, routing::get};
 use serde_json::json;
 use std::ffi::c_char;
 use std::sync::{Arc, Mutex};
+use sysinfo::{Disks, System};
 use thiserror::Error;
 use tokio::runtime::Handle;
 use tokio::time::Duration;
@@ -48,6 +49,7 @@ struct StatusPlugin {
     rt_handle: Handle,
     logger: ArcLogger,
     status: Arc<Mutex<Status>>,
+    system: Mutex<System>,
 }
 
 struct Status {
@@ -70,7 +72,9 @@ impl StatusPlugin {
             disk_usage_formatted: "120G / 160G".to_string(),
         }));
 
-        Self { rt_handle, logger, status }
+        let sys = System::new_all();
+
+        Self { rt_handle, logger, status, system: Mutex::new(sys) }
     }
 }
 
@@ -110,14 +114,58 @@ impl StatusPlugin {
         token: &CancellationToken,
     ) -> Result<(), RunError> {
         loop {
-            self.logger.log(LogEntry::new2(LogLevel::Debug, "status", "heartbeat"));
+            let (cpu_usage, ram_usage) = {
+                let mut sys = self.system.lock().unwrap_or_else(|e| e.into_inner());
+                sys.refresh_cpu_usage();
+                sys.refresh_memory();
 
-            // Update the shared status (simple simulation for now)
+                let cpu_usage = {
+                    let cpus = sys.cpus();
+                    if cpus.is_empty() {
+                        0u8
+                    } else {
+                        let sum: f64 = cpus.iter().map(|c| c.cpu_usage() as f64).sum();
+                        (sum / (cpus.len() as f64)).round() as u8
+                    }
+                };
+
+                let total_mem = sys.total_memory(); // KB
+                let used_mem = sys.used_memory(); // KB
+                let ram_usage = if total_mem > 0 {
+                    ((used_mem as f64 / total_mem as f64) * 100.0).round() as u8
+                } else {
+                    0
+                };
+
+                (cpu_usage, ram_usage)
+            };
+
+            // Compute disk metrics from a freshly refreshed disk list.
+            let (disk_usage_percent, disk_formatted) = {
+                let mut disk_usage_percent = 0_u8;
+                let mut disk_formatted = String::new();
+                // Build a refreshed disk list locally instead of depending on `sys.disks()`.
+                let disks = Disks::new_with_refreshed_list();
+                if let Some(disk) = disks.iter().max_by_key(|d| d.total_space()) {
+                    let total = disk.total_space();
+                    let available = disk.available_space();
+                    if total > 0 {
+                        let used = total - available;
+                        disk_usage_percent = ((used as f64 / total as f64) * 100.0).round() as u8;
+                    }
+                    // Format in GiB for readability.
+                    let used_gib = (total - available) as f64 / (1024.0 * 1024.0 * 1024.0);
+                    let total_gib = total as f64 / (1024.0 * 1024.0 * 1024.0);
+                    disk_formatted = format!("{:.0}G / {:.0}G", used_gib, total_gib);
+                }
+                (disk_usage_percent, disk_formatted)
+            };
+
             if let Ok(mut s) = self.status.lock() {
-                s.cpu_usage = s.cpu_usage.wrapping_add(1) % 100;
-                s.ram_usage = s.ram_usage.wrapping_add(1) % 100;
-                s.disk_usage = s.disk_usage.wrapping_add(1) % 100;
-                s.disk_usage_formatted = format!("{}G / 160G", 120 + s.disk_usage as i32);
+                s.cpu_usage = cpu_usage;
+                s.ram_usage = ram_usage;
+                s.disk_usage = disk_usage_percent;
+                s.disk_usage_formatted = disk_formatted;
             }
 
             let sleep = || {
