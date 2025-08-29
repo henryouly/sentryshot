@@ -73,7 +73,7 @@ impl Plugin for StatusPlugin {
 			margin-right: 0.3rem;
 			margin-left: 0.3rem;
 			padding: 0.05rem;
-			background: var(--colorbg);
+			background: var(--color0);
 			border-radius: 0.2rem;
 		}
 		.statusbar-progressbar span {
