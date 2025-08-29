@@ -2,12 +2,16 @@
 
 use async_trait::async_trait;
 use common::{
-    LogSource
+    ArcLogger, LogSource, LogEntry, LogLevel,
+    monitor::ArcMonitor,
 };
 use plugin::{Plugin, PreLoadPlugin, types::{Router, Templates}};
 use std::ffi::c_char;
 use std::sync::Arc;
+use thiserror::Error;
 use tokio::runtime::Handle;
+use tokio::time::Duration;
+use tokio_util::sync::CancellationToken;
 use upon::{Engine, Template};
 
 
@@ -36,13 +40,14 @@ impl PreLoadPlugin for PreLoadStatus {
 
 #[unsafe(no_mangle)]
 pub extern "Rust" fn load(app: &dyn plugin::Application) -> Arc<dyn Plugin> {
-    Arc::new(StatusPlugin::new(app.rt_handle()))
+    Arc::new(StatusPlugin::new(app.rt_handle(), app.logger()))
 }
 
 struct StatusPlugin {
     engine: Engine<'static>,
     template: Template<'static>,
     rt_handle: Handle,
+    logger: ArcLogger,
 }
 
 struct Status {
@@ -52,13 +57,17 @@ struct Status {
   disk_usage_formatted: String,
 }
 
+#[derive(Debug, Error)]
+enum RunError {
+}
+
 impl StatusPlugin {
-    fn new(rt_handle: Handle) -> Self {
+    fn new(rt_handle: Handle, logger: ArcLogger) -> Self {
         let engine = Engine::new();
         let template = engine
             .compile(include_str!("templates/status.tpl"))
             .expect("failed to compile status plugin template");
-        Self { engine, template, rt_handle }
+        Self { engine, template, rt_handle, logger }
     }
 }
 
@@ -95,7 +104,31 @@ impl Plugin for StatusPlugin {
         }
     }
 
+    async fn on_monitor_start(&self, token: CancellationToken, _monitor: ArcMonitor) {
+        let _ = self.run(&token).await;
+    }
+
     fn route(&self, router: Router) -> Router {
         router
+    }
+}
+
+impl StatusPlugin {
+    async fn run(
+        &self,
+        token: &CancellationToken,
+    ) -> Result<(), RunError> {
+        loop {
+            self.logger.log(LogEntry::new2(LogLevel::Debug, "status", "heartbeat"));
+
+            let sleep = || {
+                let _enter = self.rt_handle.enter();
+                tokio::time::sleep(Duration::from_secs(10))
+            };
+            tokio::select! {
+                () = token.cancelled() => return Ok(()),
+                () = sleep() => {}
+            }
+        }
     }
 }
