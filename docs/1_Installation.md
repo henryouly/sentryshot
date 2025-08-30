@@ -28,7 +28,7 @@ docker run -it \
 	-v /docker/sentryshot/configs:/app/configs \
 	-v /docker/sentryshot/storage:/app/storage \
 	-p 2020:2020 \
-	codeberg.org/sentryshot/sentryshot:v0.3.4
+	codeberg.org/sentryshot/sentryshot:v0.3.5
 ```
 
 App will be served on `http://ip:2020/live`
@@ -40,7 +40,7 @@ services:
   sentryshot:
     shm_size: 500m
     restart: unless-stopped
-    image: codeberg.org/sentryshot/sentryshot:v0.3.4
+    image: codeberg.org/sentryshot/sentryshot:v0.3.5
     ports:
       - 2020:2020
     environment:
@@ -57,7 +57,9 @@ services:
 
 ## Tarball Install
 
-Requires a system with `glibc 2.34+` Check with `ld -v`. `libusb-1.0` is not included.
+Requires a system with `glibc 2.34+` Check with `ld -v`
+
+`libusb-1.0` is not included.
 
 Download a tarball from the [releases](https://codeberg.org/SentryShot/sentryshot/releases) page.
 
@@ -76,7 +78,7 @@ Help wanted for proper install instructions.
 
 #### Dependencies
 
-- [rust](https://www.rust-lang.org/tools/install) 1.65+
+- [rust](https://www.rust-lang.org/tools/install) 1.85+
 * [libtensorflowlite_c](https://www.tensorflow.org/lite/guide/build_cmake#build_tensorflow_lite_c_library)
 - [libedgetpu](https://github.com/google-coral/libedgetpu)
 - `libavutil-dev`
@@ -98,4 +100,3 @@ cd sentryshot
 # Make a tarball.
 tar -czvf "./build/sentryshot-x86_64.tar.gz" -C "./build/x86_64"
 ```
-[Tarball Install](#tarball-install)

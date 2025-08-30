@@ -1,5 +1,9 @@
 ## unreleased
 
+## `v0.3.5`
+
+-   move settings documentation into the settings page
+
 ## `v0.3.4`
 
 -   fix account creation id error #81
