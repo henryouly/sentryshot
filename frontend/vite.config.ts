@@ -3,9 +3,10 @@ import react from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/frontend/',
   plugins: [react()],
   build: {
-    outDir: '../web/static',
+    outDir: './dist',
     emptyOutDir: true
   }
 })

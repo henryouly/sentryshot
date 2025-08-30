@@ -58,6 +58,10 @@ struct Asset;
 #[folder = "../../web/templates"]
 struct Tpls;
 
+#[derive(RustEmbed)]
+#[folder = "../../frontend/dist"]
+struct Frontend;
+
 #[derive(Debug, Error)]
 pub enum RunError {
     #[error("create env config: {0}")]
@@ -239,6 +243,13 @@ impl App {
 
         let tpls = Tpls::load();
 
+        let frontend_etag: String = rand::rng()
+            .sample_iter(&Alphanumeric)
+            .take(8)
+            .map(char::from)
+            .collect();        
+        let frontend = Frontend::load();
+
         let mut templates = {
             fn to_string(input: &[u8]) -> String {
                 String::from_utf8(input.to_vec()).expect("file to only contain valid characters")
@@ -294,6 +305,10 @@ impl App {
             .route_user_no_csrf(
                 "/assets/{*file}",
                 get(asset_handler).with_state((assets, assets_etag)),
+            )
+            .route_user_no_csrf(
+                "/frontend/{*file}",
+                get(asset_handler).with_state((frontend, frontend_etag)),
             )
             // Video on demand.
             .route_user_no_csrf(
