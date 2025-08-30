@@ -10,6 +10,7 @@ use axum::{Json, extract::State, routing::get};
 use serde_json::json;
 use std::ffi::c_char;
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 use sysinfo::{Disks, System};
 use thiserror::Error;
 use tokio::runtime::Handle;
@@ -50,6 +51,7 @@ struct StatusPlugin {
     logger: ArcLogger,
     status: Arc<Mutex<Status>>,
     system: Mutex<System>,
+    is_running: AtomicBool,
 }
 
 struct Status {
@@ -74,7 +76,13 @@ impl StatusPlugin {
 
         let sys = System::new_all();
 
-        Self { rt_handle, logger, status, system: Mutex::new(sys) }
+        Self {
+          rt_handle,
+          logger,
+          status,
+          system: Mutex::new(sys),
+          is_running: AtomicBool::new(false)
+        }
     }
 }
 
@@ -89,7 +97,13 @@ impl Plugin for StatusPlugin {
     }
 
     async fn on_monitor_start(&self, token: CancellationToken, _monitor: ArcMonitor) {
-        let _ = self.run(&token).await;
+        // Ensure only one runner is started even if this hook is called multiple
+        // times from different threads. Subsequent calls are ignored.
+        if self.is_running.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
+            let _ = self.run(&token).await;
+        } else {
+            self.logger.log(LogEntry::new2(LogLevel::Debug, "status", "on_monitor_start ignored (already running)"));
+        }
     }
 
     fn route(&self, router: Router) -> Router {
