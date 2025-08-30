@@ -66,10 +66,10 @@ enum RunError {
 impl StatusPlugin {
     fn new(rt_handle: Handle, logger: ArcLogger) -> Self {
         let status = Arc::new(Mutex::new(Status {
-            cpu_usage: 42,
-            ram_usage: 37,
-            disk_usage: 67,
-            disk_usage_formatted: "120G / 160G".to_string(),
+            cpu_usage: 0,
+            ram_usage: 0,
+            disk_usage: 0,
+            disk_usage_formatted: "Loading...".to_string(),
         }));
 
         let sys = System::new_all();
