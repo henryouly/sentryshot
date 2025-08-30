@@ -99,7 +99,13 @@ impl Plugin for StatusPlugin {
 }
 
 async fn status_api_handler(State(status): State<Arc<Mutex<Status>>>) -> Json<serde_json::Value> {
-    let guard = status.lock().unwrap_or_else(|e| e.into_inner());
+    let guard = match status.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => {
+            eprintln!("Status mutex poisoned in status_api_handler; recovering inner value.");
+            poisoned.into_inner()
+        }
+    };
     Json(json!({
         "cpu_usage": guard.cpu_usage,
         "ram_usage": guard.ram_usage,
