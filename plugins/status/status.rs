@@ -121,7 +121,17 @@ impl StatusPlugin {
     ) -> Result<(), RunError> {
         loop {
             let (cpu_usage, ram_usage) = {
-                let mut sys = self.system.lock().unwrap_or_else(|e| e.into_inner());
+                let mut sys = match self.system.lock() {
+                    Ok(guard) => guard,
+                    Err(poisoned) => {
+                        self.logger.log(LogEntry::new2(
+                            LogLevel::Warn,
+                            "status",
+                            "Mutex poisoned while locking system; using inner value.",
+                        ));
+                        poisoned.into_inner()
+                    }
+                };
                 sys.refresh_cpu_usage();
                 sys.refresh_memory();
 
