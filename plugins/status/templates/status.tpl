@@ -72,7 +72,7 @@
         id="status-disk-formatted"
         style="margin: auto; font-size: 0.35rem"
         class="statusbar-text"
-        >120G / 160G</span>
+        >Loading...</span>
         <span id="status-disk-number" class="statusbar-text statusbar-number"
           >0%</span
         >
