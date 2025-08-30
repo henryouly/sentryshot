@@ -119,15 +119,7 @@ impl StatusPlugin {
                 sys.refresh_cpu_usage();
                 sys.refresh_memory();
 
-                let cpu_usage = {
-                    let cpus = sys.cpus();
-                    if cpus.is_empty() {
-                        0u8
-                    } else {
-                        let sum: f64 = cpus.iter().map(|c| c.cpu_usage() as f64).sum();
-                        (sum / (cpus.len() as f64)).round() as u8
-                    }
-                };
+                let cpu_usage = sys.global_cpu_usage() as u8;
 
                 let total_mem = sys.total_memory(); // KB
                 let used_mem = sys.used_memory(); // KB
@@ -136,6 +128,8 @@ impl StatusPlugin {
                 } else {
                     0
                 };
+
+                self.logger.log(LogEntry::new2(LogLevel::Debug, "status", format!("CPU {}%, RAM {}%", cpu_usage, ram_usage).as_str()));
 
                 (cpu_usage, ram_usage)
             };
@@ -170,7 +164,7 @@ impl StatusPlugin {
 
             let sleep = || {
                 let _enter = self.rt_handle.enter();
-                tokio::time::sleep(Duration::from_secs(10))
+                tokio::time::sleep(Duration::from_secs(30))
             };
             tokio::select! {
                 () = token.cancelled() => return Ok(()),
