@@ -125,7 +125,7 @@ impl StatusPlugin {
                     Ok(guard) => guard,
                     Err(poisoned) => {
                         self.logger.log(LogEntry::new2(
-                            LogLevel::Warn,
+                            LogLevel::Warning,
                             "status",
                             "Mutex poisoned while locking system; using inner value.",
                         ));
