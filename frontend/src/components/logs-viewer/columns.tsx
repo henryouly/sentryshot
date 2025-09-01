@@ -1,8 +1,8 @@
 "use client"
 
 import { Filter } from "lucide-react";
-import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table"
+import { useEffect, useState } from "react";
+import { type Column, type ColumnDef } from "@tanstack/react-table"
 
 import {
   DropdownMenu,
@@ -21,8 +21,14 @@ export type LogEntry = {
   time: number; // microseconds like server
 };
 
-function LevelHeader() {
+function LevelHeader({ column }: { column: Column<LogEntry, unknown> }) {
   const [selectedLevels, setSelectedLevels] = useState<string[]>(["error", "warning", "info"]);
+
+  useEffect(() => {
+    if (column) {
+      column.setFilterValue(selectedLevels);
+    }
+  }, [selectedLevels, column]);
 
   return (
     <div className="relative inline-block">
@@ -67,8 +73,9 @@ export const columns: ColumnDef<LogEntry>[] = [
   },
   {
     accessorKey: "level",
-    header: () => <LevelHeader />,
+    header: ({ column }) => <LevelHeader column={column} />,
     size: 100,
+    filterFn: 'arrIncludesSome',
   },
   {
     accessorKey: "source",
