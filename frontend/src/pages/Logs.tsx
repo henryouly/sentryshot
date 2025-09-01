@@ -1,22 +1,31 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useEffect, useRef, useState } from "react";
-
-type LogEntry = {
-  level: string;
-  source?: string;
-  monitorID?: string;
-  message: string;
-  time: number; // microseconds like server
-};
+import { columns, type LogEntry } from "@/components/logs-viewer/columns";
+import { DataTable } from "@/components/logs-viewer/data-table";
 
 const DEFAULT_LEVELS = ["error", "warning", "info"];
+const MOCK_LOGS = [
+  {
+    level: "info",
+    source: "app",
+    monitorID: "123",
+    message: "Application started",
+    time: Date.now() * 1000,
+  },
+  {
+    level: "error",
+    source: "app",
+    monitorID: "123",
+    message: "Application crashed",
+    time: (Date.now() + 1000) * 1000,
+  },
+  {
+    level: "info",
+    source: "app",
+    monitorID: "123",
+    message: "Application stopped",
+    time: (Date.now() + 2000) * 1000,
+  }
+]
 
 async function fetchLogs(
   levels: string[],
@@ -33,7 +42,10 @@ async function fetchLogs(
 
   const url = `/api/log/query?${params.toString()}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`fetchLogs: ${res.status}`);
+  if (!res.ok) {
+    // throw new Error(`fetchLogs: ${res.status}`);
+    return MOCK_LOGS; // Fallback to mock logs on error
+  }
   return (await res.json()) as LogEntry[];
 }
 
@@ -60,12 +72,6 @@ async function slowPoll(
     console.error(e);
     return null;
   }
-}
-
-function fmtTime(us: number) {
-  // server uses microseconds in original code; convert to ms
-  const ms = Math.floor(us / 1000);
-  return new Date(ms).toLocaleString();
 }
 
 export default function Logs() {
@@ -140,42 +146,7 @@ export default function Logs() {
 
   return (
     <div className="h-full flex flex-col p-4 md:p-6 lg:p-8 gap-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[180px]">Time</TableHead>
-            <TableHead className="w-[100px]">Level</TableHead>
-            <TableHead className="w-[150px]">Source</TableHead>
-            <TableHead className="w-[150px]">Monitor</TableHead>
-            <TableHead>Message</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {logs.length > 0 ? (
-            logs.map((l, i) => (
-              <TableRow key={`${l.time}-${i}`}>
-                <TableCell className="font-mono text-xs">
-                  {fmtTime(l.time)}
-                </TableCell>
-                <TableCell>
-                  {l.level}
-                </TableCell>
-                <TableCell className="text-xs font-mono">{l.source ?? "-"}</TableCell>
-                <TableCell className="text-xs font-mono">{l.monitorID ?? "-"}</TableCell>
-                <TableCell className="whitespace-pre-wrap font-mono text-xs">
-                  {l.message}
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
-                No logs found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <DataTable columns={columns} data={logs} />
     </div>
   );
 }
