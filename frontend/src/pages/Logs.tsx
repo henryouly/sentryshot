@@ -37,7 +37,12 @@ async function fetchLogs(
   if (levels.length) params.set("levels", levels.join(","));
   if (sources.length) params.set("sources", sources.join(","));
   if (monitors.length) params.set("monitors", monitors.join(","));
-  if (time !== undefined) params.set("time", String(time));
+  if (time !== undefined) {
+    params.set("time", String(time));
+  } else {
+    // Set default time to now - 5secs.
+    params.set("time", String(Date.now() * 1000 - 5 * 1000 * 1000));
+  }
   params.set("limit", "100");
 
   const url = `/api/log/query?${params.toString()}`;
