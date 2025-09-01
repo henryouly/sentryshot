@@ -4,6 +4,15 @@ import { Filter } from "lucide-react";
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table"
 
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 export type LogEntry = {
   level: string;
   source?: string;
@@ -13,31 +22,33 @@ export type LogEntry = {
 };
 
 function LevelHeader() {
-  const [open, setOpen] = useState(false);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>(["error", "warning", "info"]);
 
   return (
     <div className="relative inline-block">
       <div className="flex items-center gap-2">
         <span>Level</span>
-        <button
-          aria-label="Level filter"
-          onClick={() => setOpen((s) => !s)}
-          className="p-1 rounded hover:bg-gray-200"
-          title="Filter levels"
-        >
-          <Filter className="h-4 w-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Filter className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Filter by level</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {["error", "warning", "info", "debug"].map((level) => (
+              <DropdownMenuCheckboxItem
+                key={level}
+                checked={selectedLevels.includes(level)}
+                onCheckedChange={(checked) => setSelectedLevels(
+                  (prev) => checked ? [...prev, level]
+                    : prev.filter((l) => l !== level))}
+              >
+                {level}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      {open && <div className="absolute z-10 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg">
-        <div className="p-2">
-          <select className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-            <option value="error">Error</option>
-            <option value="warning">Warning</option>
-            <option value="info">Info</option>
-            <option value="debug">Debug</option>
-          </select>
-        </div>
-      </div>}
     </div>
   )
 }
