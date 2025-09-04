@@ -17,9 +17,12 @@ doctest = false
 [dependencies]
 common.path = "../../src/common"
 plugin.path = "../../src/plugin"
+rust-embed.path = "../../src/rust-embed"
 
 axum.workspace = true
 async-trait.workspace = true
+mime_guess.workspace = true
+rand.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 
