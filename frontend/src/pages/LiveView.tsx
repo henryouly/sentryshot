@@ -39,14 +39,6 @@ export default function LiveView() {
     const signal = controller.signal;
 
     const initializeViewer = async () => {
-      // Create a single object with the environment variables
-      const envVars = {
-        csrfToken: import.meta.env.VITE_CSRF_TOKEN,
-        tz: import.meta.env.VITE_TZ,
-        logSources: JSON.parse(import.meta.env.VITE_LOG_SOURCES),
-        monitorGroups: JSON.parse(import.meta.env.VITE_MONITOR_GROUPS),
-      };
-
       try {
         const fetchedData = await fetchEnvData(signal);
 
@@ -54,10 +46,13 @@ export default function LiveView() {
         setGlobals({
           currentPage: 'frontend/live',
           isAdmin: true,
-          ...envVars,
-          flags: fetchedData.flags,
-          monitors: fetchedData.monitorConfig,
-          monitorsInfo: fetchedData.monitorsInfo,
+          flags: fetchedData.flags || {},
+          monitors: fetchedData.monitorConfig || {},
+          monitorsInfo: fetchedData.monitorsInfo || [],
+          monitorGroups: fetchedData.monitorGroup || {},
+          logSources: fetchedData.logSources || [],
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/UTC',
+          csrfToken: fetchedData.csrfToken || '',
         });
 
         // Check if the DOM element exists before creating the viewer
