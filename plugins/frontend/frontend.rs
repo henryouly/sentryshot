@@ -14,7 +14,6 @@ use common::{
 use plugin::{Plugin, PreLoadPlugin, types::Router};
 use rand::{Rng, distr::Alphanumeric};
 use rust_embed::{EmbeddedFiles, RustEmbed};
-use serde_json::json;
 use std::ffi::c_char;
 use std::sync::Arc;
 
@@ -104,13 +103,13 @@ impl Plugin for FrontendPlugin {
 async fn api_env_handler(
     State((env, monitor_manager)): State<(Arc<Env>, ArcMonitorManager)>,
 ) -> Json<serde_json::Value> {
-    // Fetch monitor configs from the manager (returns Option<MonitorConfigs>).
-    // If the manager is cancelled or unavailable, fall back to an empty map.
     let monitor_configs = monitor_manager.monitor_configs().await.unwrap_or_default();
+    let monitors_info = monitor_manager.monitors_info().await.unwrap_or_default();
 
     Json(serde_json::json!({
         "flags": &env.flags,
         "monitorConfig": &monitor_configs,
+        "monitorsInfo": &monitors_info,
     }))
 }
 

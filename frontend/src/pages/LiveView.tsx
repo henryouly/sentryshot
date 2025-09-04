@@ -45,7 +45,6 @@ export default function LiveView() {
         tz: import.meta.env.VITE_TZ,
         logSources: JSON.parse(import.meta.env.VITE_LOG_SOURCES),
         monitorGroups: JSON.parse(import.meta.env.VITE_MONITOR_GROUPS),
-        monitorsInfo: JSON.parse(import.meta.env.VITE_MONITORS_INFO),
       };
 
       try {
@@ -58,11 +57,12 @@ export default function LiveView() {
           ...envVars,
           flags: fetchedData.flags,
           monitors: fetchedData.monitorConfig,
+          monitorsInfo: fetchedData.monitorsInfo,
         });
 
         // Check if the DOM element exists before creating the viewer
         if (contentGridRef.current) {
-          const viewer = newViewer(contentGridRef.current, envVars.monitorsInfo);
+          const viewer = newViewer(contentGridRef.current, fetchedData.monitorsInfo);
           viewer.reset();
         }
 
