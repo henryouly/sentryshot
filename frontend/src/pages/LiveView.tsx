@@ -43,17 +43,8 @@ export default function LiveView() {
   }, []);
 
   return (
-    <>
-      <div style={{ visibility: "hidden" }}>
-        <button id="topbar-options-btn" style={{ visibility: "hidden" }}>
-          <img
-            className="icon-filter p-3"
-            style={{ aspectRatio: "1", width: "var(--topbar-height)" }}
-            src="assets/icons/feather/sliders.svg"
-          />
-        </button>
-      </div>
+    <div>
       <VideoGrid gridSize={3} />
-    </>
+    </div>
   );
 }
