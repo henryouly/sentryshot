@@ -14,7 +14,7 @@ export default function LiveView() {
 
       // Get these from .env.local for now. Switch to json from rust backend later.
       s.textContent = `
-        const CurrentPage = '${import.meta.env.VITE_CURRENT_PAGE}';
+        const CurrentPage = 'frontend/live';
         const CSRFToken = '${import.meta.env.VITE_CSRF_TOKEN}';
         const Flags = JSON.parse('${import.meta.env.VITE_FLAGS}');
         const IsAdmin = true;

@@ -308,7 +308,13 @@ impl App {
             )
             .route_user_no_csrf(
                 "/frontend/{*file}",
-                get(asset_handler).with_state((frontend, frontend_etag)),
+                get(frontend_handler).with_state((frontend, frontend_etag)),
+            )
+            .route_user_no_csrf(
+                "/frontend",
+                get(|| async {
+                    axum::response::Redirect::to("/frontend/live")
+                }),
             )
             // Video on demand.
             .route_user_no_csrf(

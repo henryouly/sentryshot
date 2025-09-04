@@ -115,6 +115,52 @@ pub async fn asset_handler(
     }
 }
 
+/// Serve frontend static files, but fall back to `index.html` for SPA client-side routes.
+pub async fn frontend_handler(
+    Path(path): Path<String>,
+    headers: HeaderMap,
+    State(assets_and_etag): State<(EmbeddedFiles, String)>,
+) -> Response {
+    let (assets, etag) = assets_and_etag;
+
+    if let Some(if_none_match) = headers.get(header::IF_NONE_MATCH) {
+        if let Ok(if_none_match) = if_none_match.to_str() {
+            if if_none_match == etag {
+                return StatusCode::NOT_MODIFIED.into_response();
+            }
+        }
+    }
+
+    if let Some(content) = assets.get(path.as_str()) {
+        let body = Body::from(content.clone());
+        let mime = mime_guess::from_path(&path).first_or_octet_stream();
+        return (
+            [
+                (header::CONTENT_TYPE, mime.as_ref()),
+                (header::ETAG, etag.as_str()),
+                (header::CACHE_CONTROL, "public, max-age=1296000, immutable"),
+            ],
+            body,
+        )
+            .into_response();
+    }
+
+    if let Some(content) = assets.get("index.html") {
+        let body = Body::from(content.clone());
+        return (
+            [
+                (header::CONTENT_TYPE, "text/html; charset=UTF-8"),
+                (header::ETAG, etag.as_str()),
+                (header::CACHE_CONTROL, "public, max-age=0, must-revalidate"),
+            ],
+            body,
+        )
+            .into_response();
+    }
+
+    (StatusCode::NOT_FOUND, "404 Not Found").into_response()
+}
+
 #[allow(clippy::unwrap_used)]
 pub async fn hls_handler(
     Path(path): Path<String>,

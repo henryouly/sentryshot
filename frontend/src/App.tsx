@@ -21,7 +21,7 @@ function App() {
             <header className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold">
                 <Routes>
-                  <Route path="/" element={<span>Live View</span>} />
+                  <Route path="/live" element={<span>Live View</span>} />
                   <Route path="/recordings" element={<span>Recordings</span>} />
                   <Route path="/settings" element={<span>Settings</span>} />
                   <Route path="/logs" element={<span>Logs</span>} />
@@ -31,7 +31,7 @@ function App() {
             </header>
             <div className="flex-1 p-4 overflow-auto">
               <Routes>
-                <Route path="/" element={<LiveView />} />
+                <Route path="/live" element={<LiveView />} />
                 <Route path="/recordings" element={<Recordings />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/logs" element={<Logs />} />

@@ -16,7 +16,7 @@ import {
 const items = [
   {
     title: "Live View",
-    url: "/",
+    url: "/live",
     icon: Video,
   },
   {
