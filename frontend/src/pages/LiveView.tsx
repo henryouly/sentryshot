@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 // @ts-ignore: This module is legacy and has no types
 import { newViewer } from "@/components/viewer/live";
+// @ts-ignore: This module is legacy and has no types
+import { setGlobals } from "@/components/viewer/libs/common";
 
 export default function LiveView() {
   const contentGridRef = useRef<HTMLDivElement>(null);
@@ -15,26 +17,18 @@ export default function LiveView() {
   };
 
   useEffect(() => {
-    const SCRIPT_ID = "sentryshot-live-runtime-module";
-
-    {
-      const s = document.createElement("script");
-      s.id = SCRIPT_ID;
-
-      // Get these from .env.local for now. Switch to json from rust backend later.
-      s.textContent = `
-        const CurrentPage = 'frontend/live';
-        const CSRFToken = '${import.meta.env.VITE_CSRF_TOKEN}';
-        const Flags = JSON.parse('${import.meta.env.VITE_FLAGS}');
-        const IsAdmin = true;
-        const TZ = '${import.meta.env.VITE_TZ}';
-        const LogSources = JSON.parse('${import.meta.env.VITE_LOG_SOURCES}');
-        const MonitorGroups = JSON.parse('${import.meta.env.VITE_MONITOR_GROUPS}');
-        const Monitors = JSON.parse('${import.meta.env.VITE_MONITORS}');
-        const MonitorsInfo = JSON.parse('${import.meta.env.VITE_MONITORS_INFO}');
-      `;
-      document.body.appendChild(s);
-    }
+    // Set global variables for the viewer module
+    setGlobals({
+      currentPage: 'frontend/live',
+      csrfToken: import.meta.env.VITE_CSRF_TOKEN,
+      flags: JSON.parse(import.meta.env.VITE_FLAGS),
+      isAdmin: true,
+      tz: import.meta.env.VITE_TZ,
+      logSources: JSON.parse(import.meta.env.VITE_LOG_SOURCES),
+      monitorGroups: JSON.parse(import.meta.env.VITE_MONITOR_GROUPS),
+      monitors: JSON.parse(import.meta.env.VITE_MONITORS),
+      monitorsInfo: JSON.parse(import.meta.env.VITE_MONITORS_INFO),
+    });
 
     const viewer = newViewer(
       contentGridRef.current!,
@@ -43,10 +37,6 @@ export default function LiveView() {
     viewer.reset();
 
     return () => {
-      // Remove the runtime module script on unmount
-      const s = document.getElementById(SCRIPT_ID);
-      if (s && s.parentElement) s.parentElement.removeChild(s);
-
       // Cleanup placeholders the module populated (best-effort)
       contentGridRef.current?.replaceChildren();
     };
