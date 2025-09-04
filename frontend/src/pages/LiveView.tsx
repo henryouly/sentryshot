@@ -5,6 +5,15 @@ import { newViewer } from "@/components/viewer/live";
 export default function LiveView() {
   const contentGridRef = useRef<HTMLDivElement>(null);
 
+  const VideoGrid = ({ gridSize }: { gridSize: number }) => {
+    return (
+      <div
+        ref={contentGridRef}
+        style={{ display: "grid", gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+      />
+    );
+  };
+
   useEffect(() => {
     const SCRIPT_ID = "sentryshot-live-runtime-module";
 
@@ -54,19 +63,7 @@ export default function LiveView() {
           />
         </button>
       </div>
-      <div
-        className="flex"
-        style={{ margin: 0 }}
-      >
-        <div id="content" className="absolute w-full h-full" style={{ boxSizing: "border-box" }}>
-          <div className="h-full" style={{ overflowY: "auto" }}>
-            <div
-              ref={contentGridRef}
-              style={{ display: "grid", gridTemplateColumns: "repeat(var(--gridsize), 1fr)" }}
-            ></div>
-          </div>
-        </div>
-      </div>
+      <VideoGrid gridSize={3} />
     </>
   );
 }
