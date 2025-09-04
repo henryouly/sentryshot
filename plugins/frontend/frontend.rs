@@ -8,7 +8,8 @@ use axum::{
 };
 use async_trait::async_trait;
 use common::{
-    ArcLogger, LogSource,
+    ArcLogger, LogSource, Flags,
+    monitor::ArcMonitorManager,
 };
 use plugin::{Plugin, PreLoadPlugin, types::Router};
 use rand::{Rng, distr::Alphanumeric};
@@ -39,11 +40,15 @@ impl PreLoadPlugin for PreLoadFrontend {
 
 #[unsafe(no_mangle)]
 pub extern "Rust" fn load(app: &dyn plugin::Application) -> Arc<dyn Plugin> {
-    Arc::new(FrontendPlugin::new(app.logger()))
+    Arc::new(FrontendPlugin::new(
+        app.logger(),
+        app.env().flags(), 
+        app.monitor_manager()
+    ))
 }
 
 struct Env {
-    // Add any environment variables needed for the plugin here.
+    flags: Flags,
 }
 
 struct FrontendPlugin {
@@ -51,10 +56,11 @@ struct FrontendPlugin {
     env: Arc<Env>,
     web_assets: EmbeddedFiles,
     etag: String,
+    monitor_manager: ArcMonitorManager,
 }
 
 impl FrontendPlugin {
-    fn new(logger: ArcLogger) -> Self {
+    fn new(logger: ArcLogger, flags: Flags, monitor_manager: ArcMonitorManager) -> Self {
         let frontend_etag: String = rand::rng()
             .sample_iter(&Alphanumeric)
             .take(8)
@@ -62,17 +68,10 @@ impl FrontendPlugin {
             .collect();
         Self { 
             logger, 
-            env: Arc::new(Env::default()), 
+            env: Arc::new(Env { flags }), 
             web_assets: WebAssets::load(),
             etag: frontend_etag,
-        }
-    }
-}
-
-impl Default for Env {
-    fn default() -> Self {
-        Self {
-            // Initialize default environment variables here.
+            monitor_manager,
         }
     }
 }
@@ -84,7 +83,7 @@ impl Plugin for FrontendPlugin {
             // Expose a lightweight API that returns the current env as JSON.
             .route_no_auth(
                 "/frontend/api/env",
-                get(api_env_handler).with_state(self.env.clone()),
+                get(api_env_handler).with_state((self.env.clone(), self.monitor_manager.clone())),
             )
             // Serve frontend static files.
             // In a production setting, you might want to serve these files directly from a CDN or
@@ -102,9 +101,16 @@ impl Plugin for FrontendPlugin {
     }
 }
 
-async fn api_env_handler(State(env): State<Arc<Env>>) -> Json<serde_json::Value> {
-    Json(json!({
-        "test": "value"
+async fn api_env_handler(
+    State((env, monitor_manager)): State<(Arc<Env>, ArcMonitorManager)>,
+) -> Json<serde_json::Value> {
+    // Fetch monitor configs from the manager (returns Option<MonitorConfigs>).
+    // If the manager is cancelled or unavailable, fall back to an empty map.
+    let monitor_configs = monitor_manager.monitor_configs().await.unwrap_or_default();
+
+    Json(serde_json::json!({
+        "flags": &env.flags,
+        "monitorConfig": &monitor_configs,
     }))
 }
 
