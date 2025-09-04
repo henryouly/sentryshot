@@ -205,6 +205,7 @@ build_target() {
 	shift
 	
 	printf "build\n"
+  npm -C ./frontend install
   npm -C ./frontend run build
 	# shellcheck disable=SC2086,SC2091
 	$(cargo build --release --target="$target"-unknown-linux-gnu $packages)
