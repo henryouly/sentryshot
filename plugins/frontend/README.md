@@ -19,10 +19,9 @@ Files of interest
 1. Build the Vite app so the `dist/` folder is produced:
 
 ```bash
-cd frontend
 # pnpm is used in this repository; npm or yarn are fine too
-pnpm install
-pnpm build
+pnpm -C ./frontend install
+pnpm -C ./frontend build
 ```
 
 2. The plugin's `WebAssets` type uses `#[derive(RustEmbed)]` with `#[folder = "../../frontend/dist"]` (path is relative to `plugins/frontend`). When the Rust project is compiled, `rust-embed` packages files from that `dist/` folder into the binary.
