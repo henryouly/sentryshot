@@ -4,6 +4,24 @@ import { newViewer } from "@/components/viewer/live";
 // @ts-ignore: This module is legacy and has no types
 import { setGlobals } from "@/components/viewer/libs/common";
 
+// Helper function to fetch environment data
+async function fetchEnvData(signal: AbortSignal) {
+  try {
+    const res = await fetch('/frontend/api/env', { signal });
+    if (!res.ok) {
+      throw new Error(`API call failed with status: ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      // The request was intentionally cancelled, no need to log
+      return {};
+    }
+    console.warn('Failed to fetch /frontend/api/env', err);
+    return {};
+  }
+}
+
 export default function LiveView() {
   const contentGridRef = useRef<HTMLDivElement>(null);
 
@@ -17,26 +35,47 @@ export default function LiveView() {
   };
 
   useEffect(() => {
-    // Set global variables for the viewer module
-    setGlobals({
-      currentPage: 'frontend/live',
-      csrfToken: import.meta.env.VITE_CSRF_TOKEN,
-      flags: JSON.parse(import.meta.env.VITE_FLAGS),
-      isAdmin: true,
-      tz: import.meta.env.VITE_TZ,
-      logSources: JSON.parse(import.meta.env.VITE_LOG_SOURCES),
-      monitorGroups: JSON.parse(import.meta.env.VITE_MONITOR_GROUPS),
-      monitors: JSON.parse(import.meta.env.VITE_MONITORS),
-      monitorsInfo: JSON.parse(import.meta.env.VITE_MONITORS_INFO),
-    });
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-    const viewer = newViewer(
-      contentGridRef.current!,
-      JSON.parse(import.meta.env.VITE_MONITORS_INFO)
-    );
-    viewer.reset();
+    const initializeViewer = async () => {
+      // Create a single object with the environment variables
+      const envVars = {
+        csrfToken: import.meta.env.VITE_CSRF_TOKEN,
+        tz: import.meta.env.VITE_TZ,
+        logSources: JSON.parse(import.meta.env.VITE_LOG_SOURCES),
+        monitorGroups: JSON.parse(import.meta.env.VITE_MONITOR_GROUPS),
+        monitorsInfo: JSON.parse(import.meta.env.VITE_MONITORS_INFO),
+      };
+
+      try {
+        const fetchedData = await fetchEnvData(signal);
+
+        // Merge fetched data with default env vars
+        setGlobals({
+          currentPage: 'frontend/live',
+          isAdmin: true,
+          ...envVars,
+          flags: fetchedData.flags,
+          monitors: fetchedData.monitorConfig,
+        });
+
+        // Check if the DOM element exists before creating the viewer
+        if (contentGridRef.current) {
+          const viewer = newViewer(contentGridRef.current, envVars.monitorsInfo);
+          viewer.reset();
+        }
+
+      } catch (err) {
+        console.error("Initialization failed:", err);
+      }
+    };
+
+    initializeViewer();
 
     return () => {
+      // Abort the fetch request if the component unmounts
+      controller.abort();
       // Cleanup placeholders the module populated (best-effort)
       contentGridRef.current?.replaceChildren();
     };
