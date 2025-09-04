@@ -1,69 +1,56 @@
-# React + TypeScript + Vite
+# SentryShot Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend for SentryShot, a web application for viewing live video streams, logs, and recordings.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework:** [React](https.react.dev/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Routing:** [React Router](https://reactrouter.com/)
+- **Tables:** [TanStack Table](https://tanstack.com/table)
+- **Icons:** [Lucide React](https://lucide.dev/)
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [pnpm](https://pnpm.io/)
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1.  Clone the repository.
+2.  Install the dependencies:
+    ```bash
+    pnpm install
+    ```
+
+### Running the Development Server
+
+To start the local development server, run:
+
+```bash
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The application will be available at `http://localhost:5173` (or another port if 5173 is in use).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Available Scripts
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+-   `pnpm dev`: Starts the development server.
+-   `pnpm build`: Builds the application for production.
+-   `pnpm lint`: Lints the codebase using ESLint.
+-   `pnpm preview`: Serves the production build locally for preview.
+
+## Project Structure
+
+-   `src/pages`: Contains the main pages of the application (LiveView, Logs, Recordings, Settings).
+-   `src/components`: Contains reusable React components.
+    -   `src/components/ui`: Auto-generated components from shadcn/ui.
+    -   `src/components/logs-viewer`: Components related to the logs table.
+    -   `src/components/viewer`: Components for video streaming and playback.
+-   `src/lib`: Utility functions.
+-   `src/hooks`: Custom React hooks.
