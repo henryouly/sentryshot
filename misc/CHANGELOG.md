@@ -1,5 +1,8 @@
 ## unreleased
 
+-   add `WEEK_START=sunday` environment variable
+-   fix live page fullscreen button
+
 ## `v0.3.5`
 
 -   move settings documentation into the settings page
