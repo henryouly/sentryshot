@@ -1,8 +1,11 @@
-import { useEffect, useRef } from "react";
+import { Minus, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 // @ts-ignore: This module is legacy and has no types
 import { newViewer } from "@/components/viewer/live";
 // @ts-ignore: This module is legacy and has no types
 import { setGlobals } from "@/components/viewer/libs/common";
+
+import { Button } from "@/components/ui/button";
 
 // Helper function to fetch environment data
 async function fetchEnvData(signal: AbortSignal) {
@@ -25,12 +28,40 @@ async function fetchEnvData(signal: AbortSignal) {
 export default function LiveView() {
   const contentGridRef = useRef<HTMLDivElement>(null);
 
-  const VideoGrid = ({ gridSize }: { gridSize: number }) => {
+  const VideoGrid = ({ initialGridSize }: { initialGridSize: number }) => {
+    const [gridSize, setGridSize] = useState(initialGridSize);
+
     return (
-      <div
-        ref={contentGridRef}
-        style={{ display: "grid", gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
-      />
+      <div>
+
+        <div className="mb-4 flex">
+          <Button
+            className="mr-2"
+            variant={"secondary"}
+            aria-label="Decrease grid size"
+            onClick={() => setGridSize(Math.max(1, gridSize - 1))}
+            disabled={gridSize <= 1}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+
+          <Button
+            className="mr-2"
+            variant={"secondary"}
+            aria-label="Increase grid size"
+            onClick={() => setGridSize(Math.min(4, gridSize + 1))}
+            disabled={gridSize >= 4}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div
+          ref={contentGridRef}
+          style={{ display: "grid", gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+        />
+
+      </div>
     );
   };
 
@@ -77,8 +108,6 @@ export default function LiveView() {
   }, []);
 
   return (
-    <div>
-      <VideoGrid gridSize={3} />
-    </div>
+    <VideoGrid initialGridSize={3} />
   );
 }
