@@ -2,6 +2,7 @@
 members = [
   "plugins/auth_basic",
   "plugins/auth_none",
+  "plugins/frontend",
   "plugins/motion",
   "plugins/mqtt",
   "plugins/object_detection",

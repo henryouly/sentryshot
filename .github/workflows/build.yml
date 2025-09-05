@@ -20,7 +20,22 @@ jobs:
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         # If you chose API tokens for write access OR if you have a private cache
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: ./misc/utils.sh build-target-nix x86_64
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        version: 10
+        run_install: false
+    - uses: actions/setup-node@v5 # Uses the setup-node action
+      with:
+        node-version: 22
+        cache: 'pnpm'
+        cache-dependency-path: frontend/pnpm-lock.yaml
+    - name: Install dependencies
+      run: pnpm -C ./frontend install
+    - name: Build webapp
+      run: pnpm -C ./frontend run build
+    - name: Build rust app
+      run: ./misc/utils.sh build-target-nix x86_64
     - name: Tar files
       run: tar -cvf sentryshot-x86_64.tar build/x86_64
     - name: Upload build artifacts
