@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // @ts-ignore: This module is legacy and has no types
 import { newViewer } from "@/components/viewer/recordings";
 // @ts-ignore: This module is legacy and has no types
 import { newMonitorNameByID, setGlobals } from "@/components/viewer/libs/common";
+import { Button } from '@/components/ui/button';
+import { Minus, Plus } from 'lucide-react';
 
 // Helper function to fetch environment data
 async function fetchEnvData(signal: AbortSignal) {
@@ -25,7 +27,8 @@ async function fetchEnvData(signal: AbortSignal) {
 
 export default function Recordings() {
   const contentGridRef = useRef<HTMLDivElement>(null);
-  const gridSize = 3; // Default grid size for recordings view
+  const viewerRef = useRef<any>(null);
+  const [gridSize, setGridSize] = useState(3); // Default grid size for recordings view
 
   useEffect(() => {
     const controller = new AbortController();
@@ -57,6 +60,7 @@ export default function Recordings() {
           const monitorNameByID = newMonitorNameByID(fetchedData.monitorsInfo);
 
           const viewer = newViewer(monitorNameByID, contentGridRef.current, tz, isAdmin, csrfToken);
+          viewerRef.current = viewer;
           viewer.setGridSize(gridSize);
           viewer.reset();
         }
@@ -68,12 +72,44 @@ export default function Recordings() {
 
     initializeViewer();
     return () => {
+      viewerRef.current?.exitFullscreen();
+      viewerRef.current = null;
       controller.abort();
     };
   }, []);
 
+  useEffect(() => {
+    if (viewerRef.current) {
+      viewerRef.current.setGridSize(gridSize);
+      viewerRef.current.reset();
+    }
+  }, [gridSize]);
+
   return (
     <div>
+
+      <div className="mb-4 flex">
+        <Button
+          className="mr-2"
+          variant={"secondary"}
+          aria-label="Decrease grid size"
+          onClick={() => setGridSize(Math.max(1, gridSize - 1))}
+          disabled={gridSize <= 1}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+
+        <Button
+          className="mr-2"
+          variant={"secondary"}
+          aria-label="Increase grid size"
+          onClick={() => setGridSize(Math.min(4, gridSize + 1))}
+          disabled={gridSize >= 4}
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div
         ref={contentGridRef}
         style={{ display: "grid", gridTemplateColumns: `repeat(${gridSize}, 1fr)`, overflowY: "auto" }}
