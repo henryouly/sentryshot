@@ -8,9 +8,6 @@ on:
 jobs:
   build-target:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x] # Define Node.js versions for the matrix
     steps:
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@v25
@@ -23,10 +20,9 @@ jobs:
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         # If you chose API tokens for write access OR if you have a private cache
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4 # Uses the setup-node action
+    - uses: actions/setup-node@v5 # Uses the setup-node action
       with:
-        node-version: ${{ matrix.node-version }} # Specifies the Node.js version
+        node-version: 22
         cache: 'npm' # Optionally cache npm dependencies
     - name: Install dependencies
       run: npm -C ./frontend ci
