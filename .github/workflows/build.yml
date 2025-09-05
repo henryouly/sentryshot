@@ -20,14 +20,19 @@ jobs:
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         # If you chose API tokens for write access OR if you have a private cache
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        version: 10
+        run_install: false
     - uses: actions/setup-node@v5 # Uses the setup-node action
       with:
         node-version: 22
-        cache: 'npm' # Optionally cache npm dependencies
+        cache: 'pnpm'
     - name: Install dependencies
-      run: npm -C ./frontend ci
+      run: pnpm -C ./frontend install
     - name: Build webapp
-      run: npm -C ./frontend run build
+      run: pnpm -C ./frontend run build
     - name: Build rust app
       run: ./misc/utils.sh build-target-nix x86_64
     - name: Tar files
