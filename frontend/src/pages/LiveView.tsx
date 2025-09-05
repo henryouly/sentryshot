@@ -39,11 +39,7 @@ export default function LiveView() {
             className="mr-2"
             variant={"secondary"}
             aria-label="Decrease grid size"
-            onClick={() => {
-              if (contentGridRef.current) {
-                setGridSize(Math.max(1, gridSize - 1));
-              }
-            }}
+            onClick={() => setGridSize(Math.max(1, gridSize - 1))}
             disabled={gridSize <= 1}
           >
             <Plus className="h-4 w-4" />
@@ -53,11 +49,7 @@ export default function LiveView() {
             className="mr-2"
             variant={"secondary"}
             aria-label="Increase grid size"
-            onClick={() => {
-              if (contentGridRef.current) {
-                setGridSize(Math.min(4, gridSize + 1));
-              }
-            }}
+            onClick={() => setGridSize(Math.min(4, gridSize + 1))}
             disabled={gridSize >= 4}
           >
             <Minus className="h-4 w-4" />
