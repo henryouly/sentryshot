@@ -1,82 +1,67 @@
+import { Minus, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+import { Button } from '@/components/ui/button';
 
 // @ts-ignore: This module is legacy and has no types
 import { newViewer } from "@/components/viewer/recordings";
 // @ts-ignore: This module is legacy and has no types
 import { newMonitorNameByID, setGlobals } from "@/components/viewer/libs/common";
-import { Button } from '@/components/ui/button';
-import { Minus, Plus } from 'lucide-react';
-
-// Helper function to fetch environment data
-async function fetchEnvData(signal: AbortSignal) {
-  try {
-    const res = await fetch('/frontend/api/env', { signal });
-    if (!res.ok) {
-      throw new Error(`API call failed with status: ${res.status}`);
-    }
-    return await res.json();
-  } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      // The request was intentionally cancelled, no need to log
-      return {};
-    }
-    console.warn('Failed to fetch /frontend/api/env', err);
-    return {};
-  }
-}
 
 export default function Recordings() {
   const contentGridRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const [gridSize, setGridSize] = useState(3); // Default grid size for recordings view
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    const initializeViewer = async () => {
-      try {
-        const fetchedData = await fetchEnvData(signal);
-
-        // Merge fetched data with default env vars
-        setGlobals({
-          currentPage: 'frontend/live',
-          isAdmin: true,
-          flags: fetchedData.flags || {},
-          monitors: fetchedData.monitorConfig || {},
-          monitorsInfo: fetchedData.monitorsInfo || [],
-          monitorGroups: fetchedData.monitorGroup || {},
-          logSources: fetchedData.logSources || [],
-          tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/UTC',
-          csrfToken: fetchedData.csrfToken || '',
-        });
-
-
-        // Check if the DOM element exists before creating the viewer
-        if (contentGridRef.current) {
-          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/UTC';
-          const isAdmin = true;
-          const csrfToken = fetchedData.csrfToken || '';
-          const monitorNameByID = newMonitorNameByID(fetchedData.monitorsInfo);
-
-          const viewer = newViewer(monitorNameByID, contentGridRef.current, tz, isAdmin, csrfToken);
-          viewerRef.current = viewer;
-          viewer.setGridSize(gridSize);
-          viewer.reset();
-        }
-
-      } catch (err) {
-        console.error("Initialization failed:", err);
+  const { data: envData, isLoading, isError } = useQuery({
+    queryKey: ['env'],
+    queryFn: async ({ signal }) => {
+      const res = await fetch('/frontend/api/env', { signal });
+      if (!res.ok) {
+        throw new Error(`API call failed with status: ${res.status}`);
       }
-    };
+      return res.json();
+    },
+  });
 
-    initializeViewer();
+  useEffect(() => {
+    if (isLoading || isError || !envData) {
+      return;
+    }
+
+    // Merge fetched data with default env vars
+    setGlobals({
+      currentPage: 'frontend/live',
+      isAdmin: true,
+      flags: envData.flags || {},
+      monitors: envData.monitorConfig || {},
+      monitorsInfo: envData.monitorsInfo || [],
+      monitorGroups: envData.monitorGroup || {},
+      logSources: envData.logSources || [],
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/UTC',
+      csrfToken: envData.csrfToken || '',
+    });
+
+
+    // Check if the DOM element exists before creating the viewer
+    if (contentGridRef.current) {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/UTC';
+      const isAdmin = true;
+      const csrfToken = envData.csrfToken || '';
+      const monitorNameByID = newMonitorNameByID(envData.monitorsInfo);
+
+      const viewer = newViewer(monitorNameByID, contentGridRef.current, tz, isAdmin, csrfToken);
+      viewerRef.current = viewer;
+      viewer.setGridSize(gridSize);
+      viewer.reset();
+    }
+
     return () => {
       viewerRef.current?.exitFullscreen();
       viewerRef.current = null;
-      controller.abort();
     };
-  }, []);
+  }, [envData, isLoading, isError]);
 
   useEffect(() => {
     if (viewerRef.current) {
@@ -84,6 +69,14 @@ export default function Recordings() {
       viewerRef.current.reset();
     }
   }, [gridSize]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error loading environment data.</div>;
+  }
 
   return (
     <div>
