@@ -9,24 +9,24 @@ import { newViewer } from "@/components/viewer/recordings";
 // @ts-ignore: This module is legacy and has no types
 import { newMonitorNameByID, setGlobals } from "@/components/viewer/libs/common";
 
-export default function Recordings() {
-  const contentGridRef = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<any>(null);
-  const [gridSize, setGridSize] = useState(3); // Default grid size for recordings view
+type EnvData = {
+  flags: Record<string, boolean>;
+  monitorConfig: Record<string, any>;
+  monitorsInfo: Array<any>;
+  monitorGroup: Record<string, any>;
+  logSources: Array<any>;
+  csrfToken: string;
+};
 
-  const { data: envData, isLoading, isError } = useQuery({
-    queryKey: ['env'],
-    queryFn: async ({ signal }) => {
-      const res = await fetch('/frontend/api/env', { signal });
-      if (!res.ok) {
-        throw new Error(`API call failed with status: ${res.status}`);
-      }
-      return res.json();
-    },
-  });
+const useViewer = ({ envData, contentGridRef, gridSize }: {
+  envData: EnvData;
+  contentGridRef: React.RefObject<HTMLDivElement | null>;
+  gridSize: number;
+}) => {
+  const viewerRef = useRef<any>(null);
 
   useEffect(() => {
-    if (isLoading || isError || !envData) {
+    if (!envData) {
       return;
     }
 
@@ -61,7 +61,7 @@ export default function Recordings() {
       viewerRef.current?.exitFullscreen();
       viewerRef.current = null;
     };
-  }, [envData, isLoading, isError]);
+  }, [envData, contentGridRef]);
 
   useEffect(() => {
     if (viewerRef.current) {
@@ -69,6 +69,26 @@ export default function Recordings() {
       viewerRef.current.reset();
     }
   }, [gridSize]);
+
+  return viewerRef;
+};
+
+export default function Recordings() {
+  const contentGridRef = useRef<HTMLDivElement>(null);
+  const [gridSize, setGridSize] = useState(3); // Default grid size for recordings view
+
+  const { data: envData, isLoading, isError } = useQuery({
+    queryKey: ['env'],
+    queryFn: async ({ signal }) => {
+      const res = await fetch('/frontend/api/env', { signal });
+      if (!res.ok) {
+        throw new Error(`API call failed with status: ${res.status}`);
+      }
+      return res.json();
+    },
+  });
+
+  useViewer({ envData, contentGridRef, gridSize });
 
   if (isLoading) {
     return <div>Loading...</div>;
