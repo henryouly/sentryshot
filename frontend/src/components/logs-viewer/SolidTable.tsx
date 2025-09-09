@@ -1,9 +1,11 @@
-import { For } from 'solid-js';
+import { createSignal, For } from 'solid-js';
 import {
   createSolidTable,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   ColumnDef,
+  SortingState,
 } from '@tanstack/solid-table';
 
 interface SolidTableProps<T> {
@@ -12,10 +14,23 @@ interface SolidTableProps<T> {
 }
 
 export function SolidTable<T>(props: SolidTableProps<T>) {
+  const [sorting, setSorting] = createSignal<SortingState>([])
+
   const table = createSolidTable({
     get data() { return props.data; },
     get columns() { return props.columns; },
+    state: {
+      get sorting() {
+        return [
+          {
+            id: 'time',
+            desc: true
+          }
+        ]
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
