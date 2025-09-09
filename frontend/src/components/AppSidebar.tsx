@@ -4,6 +4,7 @@ import Film from 'lucide-solid/icons/film';
 import ScrollText from 'lucide-solid/icons/scroll-text';
 import Settings from 'lucide-solid/icons/settings';
 import Video from 'lucide-solid/icons/video';
+import Palette from 'lucide-solid/icons/palette';
 
 const items = [
   {
@@ -28,12 +29,60 @@ const items = [
   },
 ]
 
+const themes = [
+  "default",
+  "dark",
+  "cupcake",
+  "bumblebee",
+  "emerald",
+  "corporate",
+  "synthwave",
+  "retro",
+  "cyberpunk",
+  "valentine",
+  "halloween",
+  "garden",
+  "forest",
+  "aqua",
+  "lofi",
+  "pastel",
+  "fantasy",
+  "wireframe",
+  "black",
+  "luxury",
+  "dracula",
+].map(t => ({ name: t.charAt(0).toUpperCase() + t.slice(1), value: t }));
+
+
 const AppSidebar: Component = () => {
   return (
     <div class="drawer-side">
       <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
       <ul class="menu bg-base-200 text-base-content min-h-full w-50 p-2">
-        <div class="menu-title mb-2"><span>Sentryshot</span></div>
+        <div class="menu-title mb-2 flex">
+          <div class='flex items-center font-bold text-lg'>
+            Sentryshot
+          </div>
+          <div class="dropdown dropdown-end ml-auto">
+            <div tabindex="0" role="button" class="btn m-1">
+              <Palette class='w-4 h-4' />
+            </div>
+            <ul tabindex="0" class="dropdown-content bg-base-300 rounded-box z-1 w-30 p-2 shadow-2xl">
+              {
+                themes.map(theme =>
+                  <li>
+                    <input
+                      type="radio"
+                      name="theme-dropdown"
+                      class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
+                      aria-label={theme.name}
+                      value={theme.value} />
+                  </li>
+                )
+              }
+            </ul>
+          </div>
+        </div>
         {items.map((item) => (
           <li>
             <a href={item.url}>
