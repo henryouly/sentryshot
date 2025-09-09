@@ -1,14 +1,15 @@
 import type { Component } from 'solid-js';
+import { PanelLeft } from 'lucide-solid';
 import AppSidebar from '@/components/AppSidebar';
 
 const Settings: Component = () => {
   return (
     <div class="drawer lg:drawer-open">
       <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+      <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
+        <PanelLeft class='w-4 h-4 mr-1' />
+      </label>
       <div class="drawer-content flex flex-col items-center justify-center">
-        <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden">
-          Open drawer
-        </label>
         This is the Settings page.
       </div>
       <AppSidebar />
