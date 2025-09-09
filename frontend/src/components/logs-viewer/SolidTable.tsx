@@ -1,10 +1,12 @@
-import { For } from 'solid-js';
+import { createSignal, For } from 'solid-js';
 import {
   createSolidTable,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   ColumnDef,
+  ColumnFiltersState,
 } from '@tanstack/solid-table';
 
 interface SolidTableProps<T> {
@@ -13,6 +15,8 @@ interface SolidTableProps<T> {
 }
 
 export function SolidTable<T>(props: SolidTableProps<T>) {
+  const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([])
+
   const table = createSolidTable({
     get data() { return props.data; },
     get columns() { return props.columns; },
@@ -24,14 +28,25 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
             desc: true
           }
         ]
-      }
+      },
+      get columnFilters() { return columnFilters(); }
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: setColumnFilters,
   });
 
   return (
     <div class="overflow-hidden border-gray-600 w-full">
+      <div class='flex items-center p-4'>
+        <input
+          placeholder="Filter messages..."
+          class="input p-2 border"
+          value={(table.getColumn("message")?.getFilterValue() as string) ?? ""}
+          onInput={e => table.getColumn("message")?.setFilterValue(e.target.value)}
+        />
+      </div>
       <table class="table table-auto">
         <thead>
           <For each={table.getHeaderGroups()}>

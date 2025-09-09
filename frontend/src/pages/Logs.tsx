@@ -12,7 +12,7 @@ const Logs: Component = () => {
       <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
         <PanelLeft class='w-4 h-4 mr-1' />
       </label>
-      <div class="drawer-content flex flex-col items-center justify-center">
+      <div class="drawer-content flex flex-col">
         <SolidTable data={logs} columns={columns} />
       </div>
       <AppSidebar />
