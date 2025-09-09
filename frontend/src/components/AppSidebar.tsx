@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import { createEffect, createSignal, type Component } from 'solid-js';
 
 import Film from 'lucide-solid/icons/film';
 import ScrollText from 'lucide-solid/icons/scroll-text';
@@ -55,6 +55,14 @@ const themes = [
 
 
 const AppSidebar: Component = () => {
+  const theme = localStorage.getItem("theme") ?? "default";
+  const [currentTheme, setCurrentTheme] = createSignal<string>(theme);
+
+  createEffect(() => {
+    localStorage.setItem("theme", currentTheme());
+    document.documentElement.setAttribute("data-theme", currentTheme());
+  }, [currentTheme]);
+
   return (
     <div class="drawer-side">
       <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
@@ -76,6 +84,9 @@ const AppSidebar: Component = () => {
                       name="theme-dropdown"
                       class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
                       aria-label={theme.name}
+                      onChange={() => {
+                        setCurrentTheme(theme.value);
+                      }}
                       value={theme.value} />
                   </li>
                 )
