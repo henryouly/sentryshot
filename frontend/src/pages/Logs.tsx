@@ -1,5 +1,6 @@
 import type { Component } from 'solid-js';
-import { PanelLeft } from 'lucide-solid';
+import PanelLeft from 'lucide-solid/icons/panel-left';
+
 import AppSidebar from '@/components/AppSidebar';
 import { columns, logs } from '@/components/logs-viewer/columns';
 import { SolidTable } from '@/components/logs-viewer/SolidTable';

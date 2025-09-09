@@ -1,6 +1,9 @@
 import type { Component } from 'solid-js';
 
-import { Film, ScrollText, Settings, Video } from 'lucide-solid';
+import Film from 'lucide-solid/icons/film';
+import ScrollText from 'lucide-solid/icons/scroll-text';
+import Settings from 'lucide-solid/icons/settings';
+import Video from 'lucide-solid/icons/video';
 
 const items = [
   {

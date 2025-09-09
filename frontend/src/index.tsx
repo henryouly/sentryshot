@@ -1,16 +1,16 @@
 /* @refresh reload */
 import './index.css';
+import { lazy } from 'solid-js';
 import { render } from 'solid-js/web';
 import { Router, Route, Navigate } from '@solidjs/router';
 import 'solid-devtools';
 
-import App from './App';
-import LiveView from '@/pages/LiveView';
-import Recordings from '@/pages/Recordings';
-import Settings from '@/pages/Settings';
-import Logs from '@/pages/Logs';
-
 const root = document.getElementById('root');
+
+const LiveView = lazy(() => import('@/pages/LiveView'));
+const Recordings = lazy(() => import('@/pages/Recordings'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Logs = lazy(() => import('@/pages/Logs'));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(

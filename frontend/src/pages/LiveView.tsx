@@ -1,5 +1,6 @@
 import type { Component } from 'solid-js';
-import { PanelLeft } from 'lucide-solid';
+import PanelLeft from 'lucide-solid/icons/panel-left';
+
 import AppSidebar from '@/components/AppSidebar';
 
 const LiveView: Component = () => {
