@@ -1,6 +1,8 @@
 import type { Component } from 'solid-js';
 import { PanelLeft } from 'lucide-solid';
 import AppSidebar from '@/components/AppSidebar';
+import { columns, logs } from '@/components/logs-viewer/columns';
+import { SolidTable } from '@/components/logs-viewer/SolidTable';
 
 const Logs: Component = () => {
   return (
@@ -10,7 +12,7 @@ const Logs: Component = () => {
         <PanelLeft class='w-4 h-4 mr-1' />
       </label>
       <div class="drawer-content flex flex-col items-center justify-center">
-        This is the Logs page.
+        <SolidTable data={logs} columns={columns} />
       </div>
       <AppSidebar />
     </div>
