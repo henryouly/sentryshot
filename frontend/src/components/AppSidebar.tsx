@@ -29,8 +29,8 @@ const AppSidebar: Component = () => {
   return (
     <div class="drawer-side">
       <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-      <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-        <li class="menu-title mb-2"><span>Sentryshot</span></li>
+      <ul class="menu bg-base-200 text-base-content min-h-full w-50 p-2">
+        <div class="menu-title mb-2"><span>Sentryshot</span></div>
         {items.map((item) => (
           <li>
             <a href={item.url}>
