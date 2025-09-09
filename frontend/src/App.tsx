@@ -1,4 +1,5 @@
 import type { Component } from 'solid-js';
+import { redirect } from "@solidjs/router";
 
 const App: Component = () => {
   return (

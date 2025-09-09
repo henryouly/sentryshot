@@ -1,9 +1,14 @@
 /* @refresh reload */
 import './index.css';
 import { render } from 'solid-js/web';
+import { Router, Route, Navigate } from '@solidjs/router';
 import 'solid-devtools';
 
 import App from './App';
+import LiveView from '@/pages/LiveView';
+import Recordings from '@/pages/Recordings';
+import Settings from '@/pages/Settings';
+import Logs from '@/pages/Logs';
 
 const root = document.getElementById('root');
 
@@ -13,4 +18,12 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <App />, root!);
+render(() => (
+  <Router>
+    <Route path="/" component={() => <Navigate href="/live" />} />
+    <Route path="/live" component={LiveView} />
+    <Route path="/recordings" component={Recordings} />
+    <Route path="/settings" component={Settings} />
+    <Route path="/logs" component={Logs} />
+  </Router>
+), root!);
