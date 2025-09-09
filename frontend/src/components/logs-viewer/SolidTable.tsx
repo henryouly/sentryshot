@@ -20,14 +20,14 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
 
   return (
     <div class="overflow-hidden border-gray-600 w-full">
-      <table class="table">
+      <table class="table table-auto">
         <thead>
           <For each={table.getHeaderGroups()}>
             {headerGroup => (
               <tr>
                 <For each={headerGroup.headers}>
                   {header => (
-                    <th colSpan={header.colSpan} class={header.column.columnDef.size ? `w-[${header.column.columnDef.size}px]` : "w-full"}>
+                    <th colSpan={header.colSpan}>
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
