@@ -19,7 +19,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 }
 
 render(() => (
-  <Router>
+  <Router base='/frontend/'>
     <Route path="/" component={() => <Navigate href="/live" />} />
     <Route path="/live" component={LiveView} />
     <Route path="/recordings" component={Recordings} />

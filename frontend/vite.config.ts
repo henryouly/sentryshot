@@ -5,6 +5,7 @@ import devtools from 'solid-devtools/vite';
 import path from 'path';
 
 export default defineConfig({
+  base: '/frontend/',
   plugins: [devtools(), solidPlugin(), tailwindcss()],
   build: {
     target: 'esnext',

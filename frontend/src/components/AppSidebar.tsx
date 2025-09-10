@@ -1,5 +1,7 @@
 import { createEffect, createSignal, type Component } from 'solid-js';
 
+import { A } from "@solidjs/router";
+
 import Film from 'lucide-solid/icons/film';
 import ScrollText from 'lucide-solid/icons/scroll-text';
 import Settings from 'lucide-solid/icons/settings';
@@ -51,10 +53,10 @@ const AppSidebar: Component = () => {
         </div>
         {items.map((item) => (
           <li>
-            <a href={item.url}>
+            <A href={item.url}>
               <item.icon class='w-4 h-4 mr-1' />
               {item.title}
-            </a>
+            </A>
           </li>
         ))}
       </ul>
