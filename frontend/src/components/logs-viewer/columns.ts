@@ -42,7 +42,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
   },
 ];
 
-export const logs: LogEntry[] = [
+export const DEFAULT_LOGS: LogEntry[] = [
   { time: 1672531199000000, level: 'info', source: 'system', monitorID: 'mon1', message: 'System started successfully.' },
   { time: 1672531299000000, level: 'warning', source: 'auth', monitorID: 'mon2', message: 'Multiple failed login attempts detected.' },
   { time: 1672531399000000, level: 'error', source: 'database', monitorID: 'mon3', message: 'Database connection lost.' },
