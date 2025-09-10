@@ -53,7 +53,10 @@ const AppSidebar: Component = () => {
         </div>
         {items.map((item) => (
           <li>
-            <A href={item.url}>
+            <A
+              href={item.url}
+              class="hover:bg-primary! hover:text-primary-content! focus-visible:bg-primary! focus-visible:text-primary-content!"
+            >
               <item.icon class='w-4 h-4 mr-1' />
               {item.title}
             </A>
