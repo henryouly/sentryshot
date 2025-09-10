@@ -37,7 +37,7 @@ const ThemeDropdownMenu: Component = () => {
 
   return (
     <div class="dropdown dropdown-end ml-auto">
-      <div tabindex="0" role="button" class="btn m-1">
+      <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square" aria-label="change theme">
         <Palette class='w-4 h-4' />
       </div>
       <ul tabindex="0" class="dropdown-content bg-base-300 rounded-box z-1 w-30 p-2 shadow-2xl">
