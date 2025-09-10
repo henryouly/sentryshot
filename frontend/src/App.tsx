@@ -1,24 +1,21 @@
-import type { Component } from 'solid-js';
-import { redirect } from "@solidjs/router";
+import { lazy, type Component } from 'solid-js';
+
+import { Router, Route, Navigate } from '@solidjs/router';
+
+const LiveView = lazy(() => import('@/pages/LiveView'));
+const Recordings = lazy(() => import('@/pages/Recordings'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Logs = lazy(() => import('@/pages/Logs'));
 
 const App: Component = () => {
   return (
-    <div class="drawer lg:drawer-open">
-      <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content flex flex-col items-center justify-center">
-        <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden">
-          Open drawer
-        </label>
-        Welcome to SentryShot!
-      </div>
-      <div class="drawer-side">
-        <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-        <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-          <li><a>Sidebar Item 1</a></li>
-          <li><a>Sidebar Item 2</a></li>
-        </ul>
-      </div>
-    </div>
+    <Router base='/frontend'>
+      <Route path="/" component={() => <Navigate href="/live" />} />
+      <Route path="/live" component={LiveView} />
+      <Route path="/recordings" component={Recordings} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/logs" component={Logs} />
+    </Router>
   );
 };
 

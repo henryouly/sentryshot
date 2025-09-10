@@ -1,16 +1,12 @@
 /* @refresh reload */
 import './index.css';
-import { lazy } from 'solid-js';
+
 import { render } from 'solid-js/web';
-import { Router, Route, Navigate } from '@solidjs/router';
 import 'solid-devtools';
 
-const root = document.getElementById('root');
+import App from '@/App';
 
-const LiveView = lazy(() => import('@/pages/LiveView'));
-const Recordings = lazy(() => import('@/pages/Recordings'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Logs = lazy(() => import('@/pages/Logs'));
+const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(
@@ -19,11 +15,5 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 }
 
 render(() => (
-  <Router base='/frontend/'>
-    <Route path="/" component={() => <Navigate href="/live" />} />
-    <Route path="/live" component={LiveView} />
-    <Route path="/recordings" component={Recordings} />
-    <Route path="/settings" component={Settings} />
-    <Route path="/logs" component={Logs} />
-  </Router>
+  <App />
 ), root!);
