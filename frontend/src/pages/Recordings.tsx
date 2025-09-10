@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, type Component } from 'solid-js';
+import { createEffect, createResource, createSignal, onCleanup, type Component } from 'solid-js';
 import PanelLeft from 'lucide-solid/icons/panel-left';
 import Plus from 'lucide-solid/icons/plus';
 import Minus from 'lucide-solid/icons/minus';
@@ -43,6 +43,7 @@ function applyEnvGlobals(envData?: EnvData) {
 
 const Recordings: Component = () => {
   let contentGridRef;
+  let viewerRef: any = null;  // ideally we want a type for the viewer.
   const MIN_GRID = 1;
   const MAX_GRID = 4;
   const [gridSize, setGridSize] = createSignal<number>(3);
@@ -76,8 +77,18 @@ const Recordings: Component = () => {
         const viewer = newViewer(monitorNameByID, contentGridRef, tz, isAdmin, csrfToken);
         viewer.setGridSize(gridSize());
         viewer.reset();
+        viewerRef = viewer;
       }
     }
+  });
+
+  onCleanup(() => {
+    try {
+      viewerRef?.exitFullscreen?.();
+    } catch {
+      /* ignore */
+    }
+    viewerRef = null;
   });
 
   return (

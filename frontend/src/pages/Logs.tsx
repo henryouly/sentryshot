@@ -1,4 +1,4 @@
-import { createEffect, createSignal, type Component } from 'solid-js';
+import { createEffect, createSignal, onCleanup, type Component } from 'solid-js';
 import PanelLeft from 'lucide-solid/icons/panel-left';
 
 import AppSidebar from '@/components/AppSidebar';
@@ -62,6 +62,8 @@ async function slowPoll(
 const Logs: Component = () => {
   const [logs, setLogs] = createSignal<LogEntry[]>([]);
   let lastTimeRef: number | undefined = undefined;
+  let abortController: AbortController | null = null;
+  let running = true;
 
   createEffect(() => {
     (async () => {
@@ -79,8 +81,7 @@ const Logs: Component = () => {
   });
 
   createEffect(() => {
-    const abortController = new AbortController();
-    let running = true;
+    abortController = new AbortController();
     (async () => {
       while (running) {
         const last = lastTimeRef ?? Date.now() * 1000;
@@ -94,6 +95,12 @@ const Logs: Component = () => {
         await new Promise((r) => setTimeout(r, 100));
       }
     })();
+  });
+
+  onCleanup(() => {
+    abortController?.abort();
+    abortController = null;
+    running = false;
   });
 
   return (
