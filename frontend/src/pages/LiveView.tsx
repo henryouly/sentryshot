@@ -1,5 +1,7 @@
-import { createEffect, createResource, type Component } from 'solid-js';
+import { createEffect, createResource, createSignal, type Component } from 'solid-js';
 import PanelLeft from 'lucide-solid/icons/panel-left';
+import Plus from 'lucide-solid/icons/plus';
+import Minus from 'lucide-solid/icons/minus';
 
 // @ts-ignore: legacy module without types
 import { newViewer } from "@/components/viewer/live";
@@ -41,7 +43,9 @@ function applyEnvGlobals(envData?: EnvData) {
 
 const LiveView: Component = () => {
   let contentGridRef;
-  const gridSize = 3;
+  const MIN_GRID = 1;
+  const MAX_GRID = 4;
+  const [gridSize, setGridSize] = createSignal<number>(3);
 
   const [envData] = createResource<EnvData>(async () => {
     const res = await fetch("/frontend/api/env");
@@ -74,12 +78,32 @@ const LiveView: Component = () => {
     <div class="drawer lg:drawer-open">
       <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content w-full">
-        <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
-          <PanelLeft class='w-4 h-4 mr-1' />
-        </label>
+        <div class="flex items-center gap-2 p-2">
+          <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
+            <PanelLeft class='w-4 h-4' />
+          </label>
+          <button
+            type="button"
+            class="btn btn-square btn-ghost"
+            aria-label="Decrease grid size"
+            onClick={() => setGridSize((s) => Math.max(MIN_GRID, s - 1))}
+            disabled={gridSize() <= MIN_GRID}
+          >
+            <Plus class='w-4 h-4' />
+          </button>
+          <button
+            type="button"
+            class="btn btn-square btn-ghost"
+            aria-label="Increase grid size"
+            onClick={() => setGridSize((s) => Math.min(MAX_GRID, s + 1))}
+            disabled={gridSize() >= MAX_GRID}
+          >
+            <Minus class='w-4 h-4' />
+          </button>
+        </div>
         <div
           ref={contentGridRef}
-          style={{ display: "grid", "grid-template-columns": `repeat(${gridSize}, 1fr)` }}
+          style={{ display: "grid", "grid-template-columns": `repeat(${gridSize()}, 1fr)` }}
         />
       </div>
       <AppSidebar />
