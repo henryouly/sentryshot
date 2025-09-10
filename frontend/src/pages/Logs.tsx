@@ -1,31 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { columns, type LogEntry } from "@/components/logs-viewer/columns";
-import { DataTable } from "@/components/logs-viewer/data-table";
+import { createEffect, createSignal, onCleanup, type Component } from 'solid-js';
+import PanelLeft from 'lucide-solid/icons/panel-left';
+
+import AppSidebar from '@/components/AppSidebar';
+import { columns, DEFAULT_LOGS, type LogEntry } from '@/components/logs-viewer/columns';
+import { SolidTable } from '@/components/logs-viewer/SolidTable';
 
 const DEFAULT_LEVELS = ["error", "warning", "info"];
-const MOCK_LOGS = [
-  {
-    level: "info",
-    source: "app",
-    monitorID: "123",
-    message: "Application started",
-    time: Date.now() * 1000,
-  },
-  {
-    level: "error",
-    source: "app",
-    monitorID: "123",
-    message: "Application crashed",
-    time: (Date.now() + 1000) * 1000,
-  },
-  {
-    level: "info",
-    source: "app",
-    monitorID: "123",
-    message: "Application stopped",
-    time: (Date.now() + 2000) * 1000,
-  }
-]
 
 async function fetchLogs(
   levels: string[],
@@ -49,7 +29,7 @@ async function fetchLogs(
   const res = await fetch(url);
   if (!res.ok) {
     // throw new Error(`fetchLogs: ${res.status}`);
-    return MOCK_LOGS; // Fallback to mock logs on error
+    return DEFAULT_LOGS; // Fallback to mock logs on error
   }
   return (await res.json()) as LogEntry[];
 }
@@ -79,79 +59,62 @@ async function slowPoll(
   }
 }
 
-export default function Logs() {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const lastTimeRef = useRef<number | undefined>(undefined);
-  const abortRef = useRef<AbortController | null>(null);
-  const logsContainerRef = useRef<HTMLDivElement | null>(null);
+const Logs: Component = () => {
+  const [logs, setLogs] = createSignal<LogEntry[]>([]);
+  let lastTimeRef: number | undefined = undefined;
+  let abortController: AbortController | null = null;
+  let running = true;
 
-  useEffect(() => {
-    let mounted = true;
+  createEffect(() => {
     (async () => {
       try {
+
         const data = await fetchLogs(DEFAULT_LEVELS, [], []);
-        if (!mounted) return;
         setLogs(data);
-        if (data.length) lastTimeRef.current = data[data.length - 1].time;
+        if (data.length) {
+          lastTimeRef = data[data.length - 1].time;
+        }
       } catch (e) {
         console.error("initial logs fetch failed", e);
       }
     })();
+  });
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-    let running = true;
-
-    (async function pollLoop() {
+  createEffect(() => {
+    abortController = new AbortController();
+    (async () => {
       while (running) {
-        const last = lastTimeRef.current ?? Date.now() * 1000; // microseconds
-        const newLogs = await slowPoll(
-          DEFAULT_LEVELS,
-          [],
-          [],
-          last,
-          controller.signal
-        );
+        const last = lastTimeRef ?? Date.now() * 1000;
+        const newLogs = await slowPoll(DEFAULT_LEVELS, [], [], last, abortController.signal);
         if (!running) break;
         if (newLogs && newLogs.length) {
-          setLogs((prev) => {
-            const merged = [...prev, ...newLogs];
-            // cap
-            return merged.slice(-500);
-          });
-          lastTimeRef.current = newLogs[newLogs.length - 1].time;
+          setLogs((prev) => [...prev, ...newLogs].slice(-500)); // Keep last 500 logs
+          lastTimeRef = newLogs[newLogs.length - 1].time;
         }
         // small delay to avoid hot-loop (server may block until data available)
         await new Promise((r) => setTimeout(r, 100));
       }
     })();
+  });
 
-    return () => {
-      running = false;
-      controller.abort();
-      abortRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (logsContainerRef.current) {
-      const { scrollHeight, clientHeight, scrollTop } = logsContainerRef.current;
-      // Only auto-scroll if user is near the bottom
-      if (scrollHeight - scrollTop < clientHeight + 200) {
-        logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
-      }
-    }
-  }, [logs]);
+  onCleanup(() => {
+    abortController?.abort();
+    abortController = null;
+    running = false;
+  });
 
   return (
-    <div className="h-full flex flex-col p-4 md:p-6 lg:p-8 gap-4">
-      <DataTable columns={columns} data={logs} />
+    <div class="drawer lg:drawer-open">
+      <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content w-full">
+        <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden  top-4 left-4">
+          <PanelLeft class='w-4 h-4 mr-1' />
+        </label>
+        <SolidTable data={logs()} columns={columns} />
+      </div>
+      <AppSidebar />
     </div>
   );
-}
+};
+
+export default Logs;

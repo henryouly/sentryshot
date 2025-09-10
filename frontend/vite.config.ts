@@ -1,13 +1,14 @@
-import { defineConfig } from 'vite'
-import path from "path"
-import react from '@vitejs/plugin-react-swc'
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite';
+import solidPlugin from 'vite-plugin-solid';
+import devtools from 'solid-devtools/vite';
+import path from 'path';
 
-// https://vite.dev/config/
 export default defineConfig({
   base: '/frontend/',
-  plugins: [react(), tailwindcss()],
+  plugins: [devtools(), solidPlugin(), tailwindcss()],
   build: {
+    target: 'esnext',
     outDir: './dist',
     emptyOutDir: true
   },
@@ -16,4 +17,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   }
-})
+});
