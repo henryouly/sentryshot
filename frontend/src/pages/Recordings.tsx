@@ -109,7 +109,7 @@ const Recordings: Component = () => {
         </div>
         <div
           ref={contentGridRef}
-          style={{ display: "grid", "grid-template-columns": `repeat(${gridSize()}, 1fr)`, "overflow-y": "auto" }}
+          style={{ display: "grid", "grid-template-columns": `repeat(${gridSize()}, 1fr)` }}
         />
       </div>
       <AppSidebar />
