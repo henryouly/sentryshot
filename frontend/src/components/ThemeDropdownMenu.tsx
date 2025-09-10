@@ -33,7 +33,7 @@ const ThemeDropdownMenu: Component = () => {
   createEffect(() => {
     localStorage.setItem("theme", currentTheme());
     document.documentElement.setAttribute("data-theme", currentTheme());
-  }, [currentTheme]);
+  });
 
   return (
     <div class="dropdown dropdown-end ml-auto">
