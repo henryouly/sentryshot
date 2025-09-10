@@ -1,34 +1,56 @@
-## Usage
+# SentryShot Frontend
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+This is the frontend for SentryShot, a web application for viewing live video streams, logs, and recordings.
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+## Tech Stack
+
+- **Framework:** [Solid](https://solidjs.com/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Routing:** [React Router](https://reactrouter.com/)
+- **Tables:** [TanStack Table](https://tanstack.com/table)
+- **Icons:** [Lucide React](https://lucide.dev/)
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [pnpm](https://pnpm.io/)
+
+### Installation
+
+1.  Clone the repository.
+2.  Install the dependencies:
+    ```bash
+    pnpm install
+    ```
+
+### Running the Development Server
+
+To start the local development server, run:
 
 ```bash
-$ npm install # or pnpm install or yarn install
+pnpm dev
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+The application will be available at `http://localhost:5173` (or another port if 5173 is in use).
 
 ## Available Scripts
 
-In the project directory, you can run:
+-   `pnpm dev`: Starts the development server.
+-   `pnpm build`: Builds the application for production.
+-   `pnpm lint`: Lints the codebase using ESLint.
+-   `pnpm preview`: Serves the production build locally for preview.
 
-### `npm run dev` or `npm start`
+## Project Structure
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+-   `src/pages`: Contains the main pages of the application (LiveView, Logs, Recordings, Settings).
+-   `src/components`: Contains reusable React components.
+    -   `src/components/ui`: Auto-generated components from shadcn/ui.
+    -   `src/components/logs-viewer`: Components related to the logs table.
+    -   `src/components/viewer`: Components for video streaming and playback.
+-   `src/lib`: Utility functions.
+-   `src/hooks`: Custom React hooks.
