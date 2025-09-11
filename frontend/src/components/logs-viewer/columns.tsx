@@ -1,5 +1,6 @@
 import { ColumnDef } from '@tanstack/solid-table';
-import LogBadge from './LogBadge';
+import LogBadge from './LevelBadge';
+import SourceBadge from './SourceBadge';
 
 export type LogEntry = {
   level: string;
@@ -44,7 +45,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
     header: () => <span class='hidden md:table-cell'>Source</span>,
     cell: ({ row }) => {
       const source = row.getValue('source') as string;
-      return <span class='hidden md:table-cell'>{source}</span>;
+      return <span class='hidden md:table-cell'><SourceBadge source={source} /></span>;
     },
   },
   {
@@ -52,7 +53,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
     header: () => <span class='hidden md:table-cell'>Monitor</span>,
     cell: ({ row }) => {
       const monitorID = row.getValue('monitorID') as string;
-      return <span class='hidden md:table-cell'>{monitorID}</span>;
+      return <span class='hidden md:table-cell'><SourceBadge source={monitorID} /></span>;
     },
     filterFn: 'arrIncludesSome',
   },

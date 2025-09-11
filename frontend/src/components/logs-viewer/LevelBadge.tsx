@@ -7,7 +7,7 @@ const LEVELS: Record<string, { class: string; label: string; title: string }> = 
   debug: { class: 'badge-success', label: 'D', title: 'debug' },
 };
 
-const LogBadge: Component<{ level?: string }> = (props) => {
+const LevelBadge: Component<{ level?: string }> = (props) => {
   const lvl = (props.level ?? '').toLowerCase();
   const cfg = LEVELS[lvl] ?? { class: 'bg-gray-400 text-white', label: lvl ? lvl[0].toUpperCase() : '?', title: lvl || 'unknown' };
 
@@ -21,4 +21,4 @@ const LogBadge: Component<{ level?: string }> = (props) => {
   );
 };
 
-export default LogBadge;
+export default LevelBadge;

@@ -1,7 +1,8 @@
 import { createSignal, For, type Component } from 'solid-js';
 import Filter from 'lucide-solid/icons/filter';
 
-import LogBadge from './LogBadge';
+import LogBadge from './LevelBadge';
+import SourceBadge from './SourceBadge';
 
 type Props = {
   levels: string[];
@@ -61,9 +62,9 @@ const FilterPopover: Component<Props> = (props) => {
             <div class="font-medium mb-2">Monitors</div>
             <div class="max-h-40 overflow-auto border border-gray-300 rounded p-2">
               <For each={props.availableMonitors}>{m => (
-                <label class="flex items-center gap-2">
+                <label class="inline-flex items-center gap-2 ml-2 mb-2 cursor-pointer">
                   <input type="checkbox" checked={selMonitors().includes(m)} onChange={() => toggleMonitor(m)} />
-                  <span class="text-sm">{m}</span>
+                  <span class="text-sm"><SourceBadge source={m} /></span>
                 </label>
               )}</For>
             </div>
