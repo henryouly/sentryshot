@@ -13,7 +13,6 @@ export const columns: ColumnDef<LogEntry, any>[] = [
   {
     accessorKey: 'time',
     header: 'Time',
-    size: 80,
     cell: ({ row }) => {
       const microseconds = parseFloat(row.getValue('time'));
       const milliseconds = Math.floor(microseconds / 1000);
@@ -26,7 +25,6 @@ export const columns: ColumnDef<LogEntry, any>[] = [
   {
     accessorKey: 'level',
     header: 'Level',
-    size: 80,
     cell: ({ row }) => {
       const lv = row.getValue('level') as string;
       return <LogBadge level={lv} />;
@@ -35,7 +33,6 @@ export const columns: ColumnDef<LogEntry, any>[] = [
   {
     accessorKey: 'message',
     header: 'Message',
-    size: 0,
     cell: ({ row }) => {
       const msg = row.getValue('message') as string;
       return <div>{msg}</div>;
@@ -48,7 +45,6 @@ export const columns: ColumnDef<LogEntry, any>[] = [
       const source = row.getValue('source') as string;
       return <span class='hidden md:table-cell'>{source}</span>;
     },
-    size: 120,
   },
   {
     accessorKey: 'monitorID',
@@ -57,7 +53,6 @@ export const columns: ColumnDef<LogEntry, any>[] = [
       const monitorID = row.getValue('monitorID') as string;
       return <span class='hidden md:table-cell'>{monitorID}</span>;
     },
-    size: 120,
   },
 ];
 
