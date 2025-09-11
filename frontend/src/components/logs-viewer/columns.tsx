@@ -43,14 +43,21 @@ export const columns: ColumnDef<LogEntry, any>[] = [
   },
   {
     accessorKey: 'source',
-    header: 'Source',
+    header: () => <span class='hidden md:table-cell'>Source</span>,
+    cell: ({ row }) => {
+      const source = row.getValue('source') as string;
+      return <span class='hidden md:table-cell'>{source}</span>;
+    },
     size: 120,
   },
   {
     accessorKey: 'monitorID',
-    header: 'Monitor',
+    header: () => <span class='hidden md:table-cell'>Monitor</span>,
+    cell: ({ row }) => {
+      const monitorID = row.getValue('monitorID') as string;
+      return <span class='hidden md:table-cell'>{monitorID}</span>;
+    },
     size: 120,
-    enableHiding: true,
   },
 ];
 

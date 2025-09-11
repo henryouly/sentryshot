@@ -7,7 +7,6 @@ import {
   getSortedRowModel,
   ColumnDef,
   ColumnFiltersState,
-  VisibilityState,
 } from '@tanstack/solid-table';
 import FilterPopover from './FilterPopover';
 import PauseResumeButton from './PauseResumeButton';
@@ -24,10 +23,6 @@ interface SolidTableProps<T> {
 
 export function SolidTable<T>(props: SolidTableProps<T>) {
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = createSignal<VisibilityState>({
-    monitorID: false,
-    source: false,
-  })
 
   const table = createSolidTable({
     get data() { return props.data; },
@@ -42,13 +37,11 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
         ]
       },
       get columnFilters() { return columnFilters(); },
-      get columnVisibility() { return columnVisibility(); },
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
   });
 
   return (
@@ -75,7 +68,7 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
               <tr>
                 <For each={headerGroup.headers}>
                   {header => (
-                    <th colSpan={header.colSpan}>
+                    <th colSpan={header.colSpan} >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
