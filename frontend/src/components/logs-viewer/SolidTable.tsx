@@ -48,7 +48,6 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
 
   createEffect(() => {
     const column = table.getColumn("level");
-    console.log(selectedLevels());
     if (column) {
       column.setFilterValue(selectedLevels());
     }
