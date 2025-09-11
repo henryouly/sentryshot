@@ -1,4 +1,5 @@
 import { ColumnDef } from '@tanstack/solid-table';
+import LogBadge from './LogBadge';
 
 export type LogEntry = {
   level: string;
@@ -10,35 +11,46 @@ export type LogEntry = {
 
 export const columns: ColumnDef<LogEntry, any>[] = [
   {
-    accessorKey: "time",
-    header: "Time",
-    size: 180,
+    accessorKey: 'time',
+    header: 'Time',
+    size: 80,
     cell: ({ row }) => {
-      const microseconds = parseFloat(row.getValue("time"));
+      const microseconds = parseFloat(row.getValue('time'));
       const milliseconds = Math.floor(microseconds / 1000);
-      const formatted = new Date(milliseconds).toLocaleString();
-      return formatted;
+      const d = new Date(milliseconds);
+      const short = d.toLocaleTimeString();
+      const full = d.toISOString();
+      return <span title={full}>{short}</span>;
     },
   },
   {
-    accessorKey: "level",
-    header: "Level",
-    size: 100,
+    accessorKey: 'level',
+    header: 'Level',
+    size: 80,
+    cell: ({ row }) => {
+      const lv = row.getValue('level') as string;
+      return <LogBadge level={lv} />;
+    },
   },
   {
-    accessorKey: "source",
-    header: "Source",
-    size: 150,
-  },
-  {
-    accessorKey: "monitorID",
-    header: "Monitor ID",
-    size: 150,
-  },
-  {
-    accessorKey: "message",
-    header: "Message",
+    accessorKey: 'message',
+    header: 'Message',
     size: 0,
+    cell: ({ row }) => {
+      const msg = row.getValue('message') as string;
+      return <div>{msg}</div>;
+    },
+  },
+  {
+    accessorKey: 'source',
+    header: 'Source',
+    size: 120,
+  },
+  {
+    accessorKey: 'monitorID',
+    header: 'Monitor',
+    size: 120,
+    enableHiding: true,
   },
 ];
 

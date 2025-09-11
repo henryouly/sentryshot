@@ -7,15 +7,27 @@ import {
   getSortedRowModel,
   ColumnDef,
   ColumnFiltersState,
+  VisibilityState,
 } from '@tanstack/solid-table';
+import FilterPopover from './FilterPopover';
+import PauseResumeButton from './PauseResumeButton';
 
 interface SolidTableProps<T> {
   data: T[];
   columns: ColumnDef<T, any>[];
+  availableMonitors?: string[];
+  filters?: { levels?: string[]; monitors?: string[] };
+  onFiltersChange?: (levels: string[], monitors: string[]) => void;
+  paused?: boolean;
+  onTogglePause?: () => void;
 }
 
 export function SolidTable<T>(props: SolidTableProps<T>) {
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = createSignal<VisibilityState>({
+    monitorID: false,
+    source: false,
+  })
 
   const table = createSolidTable({
     get data() { return props.data; },
@@ -29,25 +41,34 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
           }
         ]
       },
-      get columnFilters() { return columnFilters(); }
+      get columnFilters() { return columnFilters(); },
+      get columnVisibility() { return columnVisibility(); },
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
   });
 
   return (
     <div class="overflow-hidden border-gray-600 w-full">
-      <div class='flex items-center p-4'>
+      <div class='flex items-center p-4 gap-2'>
         <input
           placeholder="Filter messages..."
           class="input p-2 border"
           value={(table.getColumn("message")?.getFilterValue() as string) ?? ""}
           onInput={e => table.getColumn("message")?.setFilterValue(e.target.value)}
         />
+        <FilterPopover
+          levels={props.filters?.levels ?? []}
+          monitors={props.filters?.monitors ?? []}
+          availableMonitors={props.availableMonitors ?? []}
+          onChange={(levels, monitors) => props.onFiltersChange?.(levels, monitors)}
+        />
+        <PauseResumeButton paused={!!props.paused} onToggle={() => props.onTogglePause?.()} />
       </div>
-      <table class="table table-auto">
+      <table class="table table-sm lg:table-md table-zebra w-full">
         <thead>
           <For each={table.getHeaderGroups()}>
             {headerGroup => (
