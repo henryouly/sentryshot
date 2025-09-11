@@ -54,6 +54,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
     header: () => <span class='hidden md:table-cell'>Monitor</span>,
     cell: ({ row }) => {
       const monitorID = row.getValue('monitorID') as string;
+      if (!monitorID || monitorID?.length === 0) return <span class='hidden md:table-cell'>-</span>;
       return <span class='hidden md:table-cell'><SourceBadge source={monitorID} /></span>;
     },
     filterFn: 'arrIncludesSome',
@@ -61,7 +62,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
 ];
 
 export const DEFAULT_LOGS: LogEntry[] = [
-  { time: 1672531199000000, level: 'info', source: 'system', monitorID: 'mon1', message: 'System started successfully.' },
+  { time: 1672531199000000, level: 'info', source: 'system', monitorID: undefined, message: 'System started successfully.' },
   { time: 1672531299000000, level: 'warning', source: 'auth', monitorID: 'mon2', message: 'Multiple failed login attempts detected.' },
   { time: 1672531399000000, level: 'error', source: 'database', monitorID: 'mon3', message: 'Database connection lost.' },
   { time: 1672531499000000, level: 'debug', source: 'api', monitorID: 'mon4', message: 'API request received with payload size of 512 bytes.' },
