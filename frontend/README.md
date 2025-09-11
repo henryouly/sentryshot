@@ -7,7 +7,7 @@ This is the frontend for SentryShot, a web application for viewing live video st
 - **Framework:** [Solid](https://solidjs.com/)
 - **Build Tool:** [Vite](https://vitejs.dev/)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
+- **UI Components:** [daisyUI](https://daisyui.com/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Routing:** [React Router](https://reactrouter.com/)
 - **Tables:** [TanStack Table](https://tanstack.com/table)
