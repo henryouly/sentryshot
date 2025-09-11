@@ -62,7 +62,7 @@ async function slowPoll(
 
 const Logs: Component = () => {
   const [logs, setLogs] = createSignal<LogEntry[]>([]);
-  const defaultFilters = { levels: DEFAULT_LEVELS, monitors: [] };
+  const defaultFilters = { levels: DEFAULT_LEVELS, monitors: [], sources: [] };
   const [paused, setPaused] = createSignal(false);
   let lastTimeRef: number | undefined = undefined;
   let abortController: AbortController | null = null;
