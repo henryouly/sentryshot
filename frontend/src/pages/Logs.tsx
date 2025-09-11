@@ -5,6 +5,7 @@ import AppSidebar from '@/components/AppSidebar';
 import { columns, DEFAULT_LOGS, type LogEntry } from '@/components/logs-viewer/columns';
 import { SolidTable } from '@/components/logs-viewer/SolidTable';
 
+const ALL_LEVELS = ["error", "warning", "info", "debug"];
 const DEFAULT_LEVELS = ["error", "warning", "info"];
 
 async function fetchLogs(
@@ -61,6 +62,8 @@ async function slowPoll(
 
 const Logs: Component = () => {
   const [logs, setLogs] = createSignal<LogEntry[]>([]);
+  const defaultFilters = { levels: DEFAULT_LEVELS, monitors: [], sources: [] };
+  const [paused, setPaused] = createSignal(false);
   let lastTimeRef: number | undefined = undefined;
   let abortController: AbortController | null = null;
   let running = true;
@@ -68,8 +71,7 @@ const Logs: Component = () => {
   createEffect(() => {
     (async () => {
       try {
-
-        const data = await fetchLogs(DEFAULT_LEVELS, [], []);
+        const data = await fetchLogs(ALL_LEVELS, [], []);
         setLogs(data);
         if (data.length) {
           lastTimeRef = data[data.length - 1].time;
@@ -84,8 +86,13 @@ const Logs: Component = () => {
     abortController = new AbortController();
     (async () => {
       while (running) {
+        if (paused()) {
+          await new Promise((r) => setTimeout(r, 200));
+          continue;
+        }
+
         const last = lastTimeRef ?? Date.now() * 1000;
-        const newLogs = await slowPoll(DEFAULT_LEVELS, [], [], last, abortController.signal);
+        const newLogs = await slowPoll(ALL_LEVELS, [], [], last, abortController.signal);
         if (!running) break;
         if (newLogs && newLogs.length) {
           setLogs((prev) => [...prev, ...newLogs].slice(-500)); // Keep last 500 logs
@@ -110,7 +117,15 @@ const Logs: Component = () => {
         <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden  top-4 left-4">
           <PanelLeft class='w-4 h-4 mr-1' />
         </label>
-        <SolidTable data={logs()} columns={columns} />
+        <SolidTable
+          data={logs()}
+          columns={columns}
+          availableSources={[...new Set(logs().map(l => l.source).filter(Boolean))] as string[]}
+          availableMonitors={[...new Set(logs().map(l => l.monitorID).filter(Boolean))] as string[]}
+          filters={defaultFilters}
+          paused={paused()}
+          onTogglePause={() => setPaused(p => !p)}
+        />
       </div>
       <AppSidebar />
     </div>
