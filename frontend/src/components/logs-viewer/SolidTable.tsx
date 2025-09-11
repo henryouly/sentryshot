@@ -16,7 +16,6 @@ interface SolidTableProps<T> {
   columns: ColumnDef<T, any>[];
   availableMonitors?: string[];
   filters?: { levels?: string[]; monitors?: string[] };
-  onFiltersChange?: (levels: string[], monitors: string[]) => void;
   paused?: boolean;
   onTogglePause?: () => void;
 }
@@ -76,7 +75,6 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
           onChange={(levels, monitors) => {
             setSelectedLevels(levels);
             setSelectedMonitors(monitors);
-            props.onFiltersChange?.(levels, monitors);
           }}
         />
         <PauseResumeButton paused={!!props.paused} onToggle={() => props.onTogglePause?.()} />

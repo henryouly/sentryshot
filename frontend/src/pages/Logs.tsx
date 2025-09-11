@@ -5,6 +5,7 @@ import AppSidebar from '@/components/AppSidebar';
 import { columns, DEFAULT_LOGS, type LogEntry } from '@/components/logs-viewer/columns';
 import { SolidTable } from '@/components/logs-viewer/SolidTable';
 
+const ALL_LEVELS = ["error", "warning", "info", "debug"];
 const DEFAULT_LEVELS = ["error", "warning", "info"];
 
 async function fetchLogs(
@@ -61,7 +62,7 @@ async function slowPoll(
 
 const Logs: Component = () => {
   const [logs, setLogs] = createSignal<LogEntry[]>([]);
-  const [filters, setFilters] = createSignal<{ levels: string[]; monitors: string[] }>({ levels: DEFAULT_LEVELS, monitors: [] });
+  const defaultFilters = { levels: DEFAULT_LEVELS, monitors: [] };
   const [paused, setPaused] = createSignal(false);
   let lastTimeRef: number | undefined = undefined;
   let abortController: AbortController | null = null;
@@ -70,8 +71,7 @@ const Logs: Component = () => {
   createEffect(() => {
     (async () => {
       try {
-
-        const data = await fetchLogs(filters().levels.length ? filters().levels : DEFAULT_LEVELS, [], filters().monitors);
+        const data = await fetchLogs(ALL_LEVELS, [], []);
         setLogs(data);
         if (data.length) {
           lastTimeRef = data[data.length - 1].time;
@@ -92,7 +92,7 @@ const Logs: Component = () => {
         }
 
         const last = lastTimeRef ?? Date.now() * 1000;
-        const newLogs = await slowPoll(filters().levels.length ? filters().levels : DEFAULT_LEVELS, [], filters().monitors, last, abortController.signal);
+        const newLogs = await slowPoll(ALL_LEVELS, [], [], last, abortController.signal);
         if (!running) break;
         if (newLogs && newLogs.length) {
           setLogs((prev) => [...prev, ...newLogs].slice(-500)); // Keep last 500 logs
@@ -121,14 +121,7 @@ const Logs: Component = () => {
           data={logs()}
           columns={columns}
           availableMonitors={[...new Set(logs().map(l => l.monitorID).filter(Boolean))] as string[]}
-          filters={filters()}
-          onFiltersChange={(levels, monitors) => {
-            setFilters({ levels, monitors });
-            // reset last time to fetch fresh logs matching filters
-            lastTimeRef = undefined;
-            // force immediate refetch
-            abortController?.abort();
-          }}
+          filters={defaultFilters}
           paused={paused()}
           onTogglePause={() => setPaused(p => !p)}
         />
