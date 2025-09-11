@@ -29,6 +29,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
       const lv = row.getValue('level') as string;
       return <LogBadge level={lv} />;
     },
+    filterFn: 'arrIncludesSome',
   },
   {
     accessorKey: 'message',
@@ -53,6 +54,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
       const monitorID = row.getValue('monitorID') as string;
       return <span class='hidden md:table-cell'>{monitorID}</span>;
     },
+    filterFn: 'arrIncludesSome',
   },
 ];
 

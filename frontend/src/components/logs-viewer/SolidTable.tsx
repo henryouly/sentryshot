@@ -1,4 +1,4 @@
-import { createSignal, For } from 'solid-js';
+import { createEffect, createSignal, For } from 'solid-js';
 import {
   createSolidTable,
   flexRender,
@@ -23,6 +23,8 @@ interface SolidTableProps<T> {
 
 export function SolidTable<T>(props: SolidTableProps<T>) {
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([])
+  const [selectedLevels, setSelectedLevels] = createSignal<string[]>(props.filters?.levels ?? []);
+  const [selectedMonitors, setSelectedMonitors] = createSignal<string[]>(props.filters?.monitors ?? []);
 
   const table = createSolidTable({
     get data() { return props.data; },
@@ -44,8 +46,23 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
     onColumnFiltersChange: setColumnFilters,
   });
 
+  createEffect(() => {
+    const column = table.getColumn("level");
+    console.log(selectedLevels());
+    if (column) {
+      column.setFilterValue(selectedLevels());
+    }
+  });
+
+  createEffect(() => {
+    const column = table.getColumn("monitorID");
+    if (column) {
+      column.setFilterValue(selectedMonitors());
+    }
+  });
+
   return (
-    <div class="overflow-hidden border-gray-600 w-full">
+    <div class="overflow-hidden border-gray-600 w-full h-full">
       <div class='flex items-center p-4 gap-2'>
         <input
           placeholder="Filter messages..."
@@ -57,7 +74,11 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
           levels={props.filters?.levels ?? []}
           monitors={props.filters?.monitors ?? []}
           availableMonitors={props.availableMonitors ?? []}
-          onChange={(levels, monitors) => props.onFiltersChange?.(levels, monitors)}
+          onChange={(levels, monitors) => {
+            setSelectedLevels(levels);
+            setSelectedMonitors(monitors);
+            props.onFiltersChange?.(levels, monitors);
+          }}
         />
         <PauseResumeButton paused={!!props.paused} onToggle={() => props.onTogglePause?.()} />
       </div>

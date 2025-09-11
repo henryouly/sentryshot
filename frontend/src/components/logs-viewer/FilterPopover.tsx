@@ -1,6 +1,7 @@
 import { createSignal, For, type Component } from 'solid-js';
-import LogBadge from './LogBadge';
 import Filter from 'lucide-solid/icons/filter';
+
+import LogBadge from './LogBadge';
 
 type Props = {
   levels: string[];
