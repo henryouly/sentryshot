@@ -5,7 +5,8 @@ pub mod types;
 
 use async_trait::async_trait;
 use common::{
-    ArcAuth, ArcLogger, DynEnvConfig, DynError, EnvPlugin, Event, LogEntry, LogLevel, LogSource,
+    ArcAuth, ArcDisk, ArcLogger, DynEnvConfig, DynError, EnvPlugin, Event, LogEntry, LogLevel,
+    LogSource,
     monitor::{ArcMonitor, ArcMonitorManager, MonitorConfig, MonitorHooks},
 };
 use libloading::{Library, Symbol};
@@ -63,6 +64,7 @@ pub trait Application {
     fn token(&self) -> CancellationToken;
     fn auth(&self) -> ArcAuth;
     fn monitor_manager(&self) -> ArcMonitorManager;
+    fn disk(&self) -> ArcDisk;
     fn shutdown_complete_tx(&self) -> mpsc::Sender<()>;
     fn logger(&self) -> ArcLogger;
     fn env(&self) -> DynEnvConfig;
@@ -164,6 +166,13 @@ pub fn pre_load_plugin(
 
 #[derive(Debug, Error)]
 pub enum FindPluginPathError {
+    #[cfg(debug_assertions)]
+    #[error(
+        "plugin not found: {0} \n\npoint plugin_dir in sentryshot.yaml to generated ./plugin_dir symlink"
+    )]
+    NotFound(PathBuf),
+
+    #[cfg(not(debug_assertions))]
     #[error("plugin not found: {0}")]
     NotFound(PathBuf),
 }
