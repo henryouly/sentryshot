@@ -47,6 +47,7 @@ export const columns: ColumnDef<LogEntry, any>[] = [
       const source = row.getValue('source') as string;
       return <span class='hidden md:table-cell'><SourceBadge source={source} /></span>;
     },
+    filterFn: 'arrIncludesSome',
   },
   {
     accessorKey: 'monitorID',

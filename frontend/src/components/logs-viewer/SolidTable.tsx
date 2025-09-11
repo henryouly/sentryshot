@@ -14,8 +14,9 @@ import PauseResumeButton from './PauseResumeButton';
 interface SolidTableProps<T> {
   data: T[];
   columns: ColumnDef<T, any>[];
+  availableSources?: string[];
   availableMonitors?: string[];
-  filters?: { levels?: string[]; monitors?: string[] };
+  filters?: { levels?: string[]; sources?: string[], monitors?: string[] };
   paused?: boolean;
   onTogglePause?: () => void;
 }
@@ -23,6 +24,7 @@ interface SolidTableProps<T> {
 export function SolidTable<T>(props: SolidTableProps<T>) {
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>([])
   const [selectedLevels, setSelectedLevels] = createSignal<string[]>(props.filters?.levels ?? []);
+  const [selectedSources, setSelectedSources] = createSignal<string[]>(props.filters?.sources ?? []);
   const [selectedMonitors, setSelectedMonitors] = createSignal<string[]>(props.filters?.monitors ?? []);
 
   const table = createSolidTable({
@@ -53,6 +55,13 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
   });
 
   createEffect(() => {
+    const column = table.getColumn("source");
+    if (column) {
+      column.setFilterValue(selectedSources());
+    }
+  });
+
+  createEffect(() => {
     const column = table.getColumn("monitorID");
     if (column) {
       column.setFilterValue(selectedMonitors());
@@ -71,9 +80,11 @@ export function SolidTable<T>(props: SolidTableProps<T>) {
         <FilterPopover
           levels={props.filters?.levels ?? []}
           monitors={props.filters?.monitors ?? []}
+          availableSources={props.availableSources ?? []}
           availableMonitors={props.availableMonitors ?? []}
-          onChange={(levels, monitors) => {
+          onChange={(levels, sources, monitors) => {
             setSelectedLevels(levels);
+            setSelectedSources(sources);
             setSelectedMonitors(monitors);
           }}
         />

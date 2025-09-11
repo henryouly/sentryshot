@@ -120,6 +120,7 @@ const Logs: Component = () => {
         <SolidTable
           data={logs()}
           columns={columns}
+          availableSources={[...new Set(logs().map(l => l.source).filter(Boolean))] as string[]}
           availableMonitors={[...new Set(logs().map(l => l.monitorID).filter(Boolean))] as string[]}
           filters={defaultFilters}
           paused={paused()}
