@@ -10,10 +10,11 @@ type Props = {
 };
 
 const ALL_LEVELS = ['error', 'warning', 'info', 'debug'];
+const DEFAULT_LEVELS = ['error', 'warning', 'info'];
 
 const FilterPopover: Component<Props> = (props) => {
   const [open, setOpen] = createSignal(false);
-  const [selLevels, setSelLevels] = createSignal<string[]>(props.levels ?? []);
+  const [selLevels, setSelLevels] = createSignal<string[]>(props.levels ?? DEFAULT_LEVELS);
   const [selMonitors, setSelMonitors] = createSignal<string[]>(props.monitors ?? []);
 
   function toggleLevel(l: string) {
@@ -30,7 +31,7 @@ const FilterPopover: Component<Props> = (props) => {
   }
 
   function reset() {
-    setSelLevels([]);
+    setSelLevels(DEFAULT_LEVELS);
     setSelMonitors([]);
   }
 
@@ -41,7 +42,7 @@ const FilterPopover: Component<Props> = (props) => {
       </button>
 
       {open() && (
-        <div class="absolute z-20 mt-2 p-4 bg-base-100 border rounded shadow w-72">
+        <div class="absolute right-0 z-20 mt-2 p-4 bg-base-100 border border-gray-300 rounded shadow w-72">
           <div class="mb-3">
             <div class="font-medium mb-2">Levels</div>
             <div class="flex gap-2 flex-wrap">
@@ -49,7 +50,7 @@ const FilterPopover: Component<Props> = (props) => {
                 <label class="inline-flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={selLevels().includes(level)} onChange={() => toggleLevel(level)} />
                   <LogBadge level={level} />
-                  <span class="capitalize">{level}</span>
+                  <span class="text-sm capitalize">{level}</span>
                 </label>
               )}</For>
             </div>
@@ -57,7 +58,7 @@ const FilterPopover: Component<Props> = (props) => {
 
           <div class="mb-3">
             <div class="font-medium mb-2">Monitors</div>
-            <div class="max-h-40 overflow-auto border rounded p-2">
+            <div class="max-h-40 overflow-auto border border-gray-300 rounded p-2">
               <For each={props.availableMonitors}>{m => (
                 <label class="flex items-center gap-2">
                   <input type="checkbox" checked={selMonitors().includes(m)} onChange={() => toggleMonitor(m)} />
