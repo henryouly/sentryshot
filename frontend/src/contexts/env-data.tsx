@@ -14,11 +14,9 @@ export type EnvData = {
 const DataContext = createContext<Resource<EnvData>>({} as Resource<EnvData>);
 
 export const EnvDataProvider = (props: { children: JSX.Element }) => {
-  const abortController = new AbortController();
-  onCleanup(() => abortController.abort());
-
-  // createResource is called once when the provider is created.
   const [envData] = createResource<EnvData>(async () => {
+    const abortController = new AbortController();
+    onCleanup(() => abortController.abort());
     const res = await fetch("/frontend/api/env", {
       signal: abortController.signal
     });
