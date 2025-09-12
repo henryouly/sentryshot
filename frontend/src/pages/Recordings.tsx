@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, onCleanup, type Component } from 'solid-js';
+import { createEffect, createSignal, onCleanup, type Component } from 'solid-js';
 import PanelLeft from 'lucide-solid/icons/panel-left';
 import Plus from 'lucide-solid/icons/plus';
 import Minus from 'lucide-solid/icons/minus';
@@ -10,16 +10,7 @@ import { setGlobals, newMonitorNameByID } from "@/components/viewer/libs/common"
 
 import AppSidebar from '@/components/AppSidebar';
 
-
-type EnvData = {
-  flags?: Record<string, unknown>;
-  monitorConfig?: Record<string, unknown>;
-  monitorsInfo?: Record<string, unknown>;
-  monitor_info?: Record<string, unknown>;
-  monitorGroup?: Record<string, unknown>;
-  logSources?: Array<unknown>;
-  csrfToken?: string;
-};
+import { useEnvData, EnvData } from '@/contexts/env-data';
 
 function applyEnvGlobals(envData?: EnvData) {
   if (!envData) return;
@@ -48,13 +39,7 @@ const Recordings: Component = () => {
   const MAX_GRID = 4;
   const [gridSize, setGridSize] = createSignal<number>(3);
 
-  const [envData] = createResource<EnvData>(async () => {
-    const res = await fetch("/frontend/api/env");
-    if (!res.ok) {
-      throw new Error(`API call failed with status: ${res.status}`);
-    }
-    return res.json() as Promise<EnvData>;
-  });
+  const envData = useEnvData();
 
   createEffect(() => {
     if (envData.loading) {
